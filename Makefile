@@ -15,22 +15,25 @@
 M_HOST_OS=
 ifeq ($(M_HOST_OS),)
 ifeq ($(OS),Windows_NT)
-	M_HOST_OS=WIN32
+        M_HOST_OS=WIN32
 else
-	# Should be POSIX. If not then the following line should fail
-	$(eval uname)
-
-	M_HOST_OS=NIX
+ifneq ($(shell uname),)
+        M_HOST_OS=NIX
+else
+        $(error Could not auto-detect host operating system)
+endif
+endif
 endif
 
 ifeq ($(M_HOST_OS),WIN32)
-	V_E=.exe
-	V_MKDIR=@-MD
-else ifeq ($(M_HOST_OS),NIX)
-	V_E=
-	V_MKDIR=mkdir -p
+        V_E=.exe
+        V_MKDIR=@-MD
 else
-	V_BADOS=1
+ifeq ($(M_HOST_OS),NIX)
+        V_E=
+        V_MKDIR=mkdir -p
+else
+        V_BADOS=1
 endif
 endif
 $(if $(filter $(V_BADOS),1),$(error M_HOST_OS must be either WIN32 or NIX, not '$(M_HOST_OS)'))
