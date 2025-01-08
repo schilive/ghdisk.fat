@@ -1,9 +1,9 @@
-# All internal variables are prefixed with a letter then "_". The following list
-# says the meanings of each.
+# All variables are prefixed with a letter then "_". The following list says the
+# meanings of each prefix.
 #
-#  - _M: Modifiable by the user.
-#  - _C: Constants.
-#  - _V: Modifiable only by Makefile.
+#  - M_: Modifiable by the user.
+#  - C_: Constants.
+#  - V_: Modifiable only by Makefile.
 #
 #  Definitions are always written prefixed with "fn_". Their use and
 #  implications are explained by a comment directly above them.
