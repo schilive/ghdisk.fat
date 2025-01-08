@@ -14,11 +14,14 @@
 
 M_HOST_OS=
 ifeq ($(M_HOST_OS),)
+        $(info Info: No host OS operating system manually given. Auto-detecting.)
 ifeq ($(OS),Windows_NT)
         M_HOST_OS=WIN32
+        $(info Info: Auto-detected Windows, through %OS%)
 else
 ifneq ($(shell uname),)
         M_HOST_OS=NIX
+        $(info Info: Auto-detected Unix, through 'uname')
 else
         $(error Could not auto-detect host operating system)
 endif
