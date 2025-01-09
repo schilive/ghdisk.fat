@@ -30,11 +30,9 @@ endif
 
 ifeq ($(M_HOST_OS),WIN32)
         V_E=.exe
-        V_MKDIR=@-MD
 else
 ifeq ($(M_HOST_OS),NIX)
         V_E=
-        V_MKDIR=mkdir -p
 else
         V_BADOS=1
 endif
