@@ -55,7 +55,8 @@ endef
 # Deletes file and subdirectories. Does not return error.
 # Usage <file/dir>
 define fn_rmdir
-$(if $(filter $(M_HOST_OS),WIN32),DEL /S /Q $(1) && RD /S /Q $(1),rm -rf $(1))
+$(if $(filter $(M_HOST_OS),WIN32),DEL /S /Q $(1)
+@-RD /S /Q $(1),rm -rf $(1))
 endef
 
 ## File and Directory Settings ##
