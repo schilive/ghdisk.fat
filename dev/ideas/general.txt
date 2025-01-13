@@ -1,0 +1,17 @@
+# Regular-Header
+1. Identify FAT version with different methods; for example, like the FAT
+specification X, like Windows driver, like MS-DOS version X, like Linux'
+driver.
+2. Use an environmental variable to specify the file being handled, the FAT
+version identification method, and maybe other things.
+
+# Kinda Looney
+1. A "script"-like file interpreted by the program to do the actions proposed.
+It would present the actions and the error conditions. This would make so that
+file would not have to be reopened lots of times.
+
+# Looney
+1. Make a daemon/service to open and make actions on the file.
+2. Mount the file image.
+3. Make a CLI interpreter that opens the FAT image and takes command from the
+user, so they can execute commands.
