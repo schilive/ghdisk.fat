@@ -14,27 +14,27 @@
 
 M_HOST_OS=
 ifeq ($(M_HOST_OS),)
-        $(info Info: No host OS operating system manually given. Auto-detecting.)
+    $(info Info: No host OS operating system manually given. Auto-detecting.)
 ifeq ($(OS),Windows_NT)
-        M_HOST_OS=WIN32
-        $(info Info: Auto-detected Windows, through %OS%)
+    M_HOST_OS=WIN32
+    $(info Info: Auto-detected Windows, through %OS%)
 else
 ifneq ($(shell uname),)
-        M_HOST_OS=NIX
-        $(info Info: Auto-detected Unix, through 'uname')
+    M_HOST_OS=NIX
+    $(info Info: Auto-detected Unix, through 'uname')
 else
-        $(error Could not auto-detect host operating system)
+    $(error Could not auto-detect host operating system)
 endif
 endif
 endif
 
 ifeq ($(M_HOST_OS),WIN32)
-        V_E=.exe
+    V_E=.exe
 else
 ifeq ($(M_HOST_OS),NIX)
-        V_E=
+    V_E=
 else
-        V_BADOS=1
+    V_BADOS=1
 endif
 endif
 $(if $(filter $(V_BADOS),1),$(error M_HOST_OS must be either WIN32 or NIX, not '$(M_HOST_OS)'))
