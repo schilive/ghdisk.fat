@@ -3,7 +3,10 @@
 specification X, like Windows driver, like MS-DOS version X, like Linux'
 driver.
 2. Use an environmental variable to specify the file being handled, the FAT
-version identification method, and maybe other things.
+version identification method, the FAT file being modified, and maybe other
+things.
+3. For commands that change the volume, make a file describing the changes so
+it can be restored.
 
 # Kinda Looney
 1. A "script"-like file interpreted by the program to do the actions proposed.
