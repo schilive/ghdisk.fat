@@ -7,6 +7,8 @@ version identification method, the FAT file being modified, and maybe other
 things.
 3. For commands that change the volume, make a file describing the changes so
 it can be restored.
+4. MS-DOS boolotader, and maybe of other OSes, too.
+5. Any code in the bootloader.
 
 # Kinda Looney
 1. A "script"-like file interpreted by the program to do the actions proposed.
