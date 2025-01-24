@@ -96,11 +96,61 @@ endif
 ### 1.2. File and Directory Settings
 ###
 
-C_O := .o
-
 M_TARGET ?= ghdisk.fat
 M_BUILD_DIR ?= build
 C_SRC_DIR := src
+
+###
+### 1.3. Compiler Settings
+###
+
+M_COMPILER_MSVC ?= 0
+ifeq ($(M_COMPILER_MSVC),0)
+    V_O := .o
+    M_CC ?= gcc
+    M_CFLAGS ?= -Wall -Wextra -pedantic
+else
+    V_O := .o
+    M_CC ?= CL
+    M_LD ?= LINK
+    M_CFLAGS ?= /Wall
+endif
+
+##
+## 1.3.1. Defining compiler-specific functions
+##
+
+# Compiles C source file to an object file. The <input> must end in ".c" and the
+# output shouldn't end with $(V_O), since it will be added. This is necessary
+# because compilers often use the file extension to determine the file format,
+# and the object file extension is dependent on the compiler toolchain.
+#
+# Usage: <input>, <output>
+ifeq ($(M_COMPILER_MSVC),0)
+    define fn_cc_obj
+        $(M_CC) $(M_CFLAGS) -c -o $(2)$(V_O) $(1)
+    endef
+else
+    define fn_cc_obj
+        $(M_CC) $(M_CFLAGS) /c /Fo:$(2)$(V_O) $(1)
+    endef
+endif
+
+# Links one or more object files to an executable. The <input> and <output>
+# shouldn't end with $(V_O) and $(V_E), since they will be added. This is
+# necessary because compilers often use the file extension to determine the file
+# format, and the object file is dependent on the compiler toolchain.
+#
+# Usage: <input> ..., <output>
+ifeq ($(M_COMPILER_MSVC),0)
+    define fn_ld_exe
+        $(M_CC) $(M_CFLAGS) -o $(2)$(V_E) $(addsuffix $(V_O),$(1))
+    endef
+else
+    define fn_ld_exe
+        $(M_LD) /OUT:$(2)$(V_E) $(addsuffix $(V_O),$(1))
+    endef
+endif
 
 ####
 #### 2. Targets
@@ -112,8 +162,8 @@ clean:
 	$(call fn_rmdir,$(M_BUILD_DIR))
 
 $(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(C_SRC_DIR)/ghdisk.fat.c | build_dir
-	gcc -Wall -Wextra -pedantic -c -o $(M_BUILD_DIR)/ghdisk.fat$(C_O) $(C_SRC_DIR)/ghdisk.fat.c
-	gcc -Wall -Wextra -pedantic -o $(M_BUILD_DIR)/$(M_TARGET)$(V_E) $(M_BUILD_DIR)/ghdisk.fat$(C_O)
+	$(call fn_cc_obj,$(C_SRC_DIR)/ghdisk.fat.c,$(M_BUILD_DIR)/ghdisk.fat)
+	$(call fn_ld_exe,$(M_BUILD_DIR)/ghdisk.fat,$(M_BUILD_DIR)/$(M_TARGET))
 
 build_dir:
 	$(call fn_fmkdir,$(M_BUILD_DIR))
