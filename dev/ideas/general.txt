@@ -9,6 +9,8 @@ things.
 it can be restored.
 4. MS-DOS boolotader, and maybe of other OSes, too.
 5. Any code in the bootloader.
+6. Options "--msdos-volume", to select raw volume, and "--msdos-device", to
+select raw device, as a possible substitute of "-f" on MS-DOS/MS-WIN.
 
 # Kinda Looney
 1. A "script"-like file interpreted by the program to do the actions proposed.
