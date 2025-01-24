@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/* This is the entry function. */
+
 #include <stdio.h>
 
 int main(int argc, char *argv[])
