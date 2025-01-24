@@ -62,9 +62,11 @@ $(if $(filter $(V_BADOS),1),$(error M_HOST_OS must be either WIN32 or NIX, not '
 # Usage: <dir/dirs>
 ifeq ($(M_HOST_OS),WIN32)
     define fn_fmkdir
-        SET STR=$(1) &&\
-	SET STR=%STR:\\=/% &&\
-        IF NOT EXIST %STR% (MD %STR%) ELSE IF NOT EXIST %STR%/ (ECHO.Error: file '%STR%' is not a directory >&2 & EXIT /B 1)
+        IF NOT EXIST "$(subst /,\,$(1))" (\
+            MD "$(subst /,\,$(1))"\
+        ) ELSE IF NOT EXIST "$(subst /,\,$(1))" (\
+            ECHO Error: file "$(subst /,\,$(1))" is not a directory >&2 & EXIT /B 1\
+        )
     endef
 else
     define fn_fmkdir
