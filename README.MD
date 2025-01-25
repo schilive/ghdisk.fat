@@ -26,6 +26,8 @@ The following configurations are available:
 - `M_BUILD_DIR [= build]`: directory used to build everything.
 - `M_COMPILER_MSVC [= 0]`: if non-0, it uses the toolchain with MSVC syntax and
   file extensions, and sets the default tools.
+- `M_DEBUG [= 0]`: if non-0, then it adds the debug flag when compiling and
+  linking.
 
 - `M_CC [= gcc | cl]`: the C compiler. If `M_COMPILER_MSVC` is set, the default
   value is `cl`, otherwise it is `gcc`.

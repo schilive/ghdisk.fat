@@ -104,16 +104,26 @@ C_SRC_DIR := src
 ### 1.3. Compiler Settings
 ###
 
+M_DEBUG ?= 0
+
 M_COMPILER_MSVC ?= 0
 ifeq ($(M_COMPILER_MSVC),0)
     V_O := .o
     M_CC ?= gcc
     M_CFLAGS ?= -Wall -Wextra -pedantic -std=c89
+    ifneq ($(M_DEBUG),0)
+        M_CFLAGS += -g
+    endif
 else
     V_O := .o
     M_CC ?= CL
     M_LD ?= LINK
     M_CFLAGS ?= /Wall
+    M_LFLAGS=
+    ifneq ($(M_DEBUG),0)
+        M_CFLAGS += /DEBUG
+	M_LFLAGS += /DEBUG
+    endif
 endif
 
 ##
@@ -148,7 +158,7 @@ ifeq ($(M_COMPILER_MSVC),0)
     endef
 else
     define fn_ld_exe
-        $(M_LD) /OUT:$(2)$(V_E) $(addsuffix $(V_O),$(1))
+        $(M_LD) $(M_LFLAGS) /OUT:$(2)$(V_E) $(addsuffix $(V_O),$(1))
     endef
 endif
 
