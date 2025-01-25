@@ -9,11 +9,12 @@ This project is entirely licensed under the MIT Licence, with a copy on
 "LICENCE.TXT"
 
 # Bulding
-The project is written in C89/ANSI C and the tool Makefile with GNU extensions
-is used for building. It supports UNIX and Windows NT (>=Windows 2000), and it
-compiles with GCC (and GCC-like, like Clang) and additionally MSVC. To use the
-default options, which builds on directory `build`, simply run the command
-`make`. The binary's path should then be `build/ghdisk.fat.exe`.
+The project is written in C89/ANSI C, the building tool used is Makefile with
+GNU extensions. It auto-detects the current OS, supporting to build on UNIX and
+Windows NT (>= Windows 2000). It supports GCC-like syntax and MSVC-like syntax.
+
+To build with the default configurations, use just `make`, which will build into
+the directory `build/`, using GCC without debug or optimisation flags.
 
 The following configurations are available:
 
