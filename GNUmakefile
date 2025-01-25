@@ -108,7 +108,7 @@ M_COMPILER_MSVC ?= 0
 ifeq ($(M_COMPILER_MSVC),0)
     V_O := .o
     M_CC ?= gcc
-    M_CFLAGS ?= -Wall -Wextra -pedantic
+    M_CFLAGS ?= -Wall -Wextra -pedantic -std=c89
 else
     V_O := .o
     M_CC ?= CL
