@@ -70,12 +70,12 @@ ifeq ($(M_HOST_OS),WIN32)
     endef
 else
     define fn_fmkdir
-	if ! [ -e $(1) ]; then\
-		mkdir -p $(1);\
-	elif ! [ -d $(1) ]; then\
-		echo "Error: file '$(1)' is not a directory" >&2;\
-		exit 1;\
-	fi
+        if ! [ -e $(1) ]; then\
+            mkdir -p $(1);\
+        elif ! [ -d $(1) ]; then\
+            echo "Error: file '$(1)' is not a directory" >&2;\
+        exit 1;\
+        fi
     endef
 endif
 
@@ -84,7 +84,7 @@ endif
 ifeq ($(M_HOST_OS),WIN32)
     define fn_rmdir
         DEL /S /Q $(1)
-	@-RD /S /Q $(1)
+        @-RD /S /Q $(1)
     endef
 else
     define fn_rmdir
