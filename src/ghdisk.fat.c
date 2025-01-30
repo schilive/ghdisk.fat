@@ -26,15 +26,18 @@ SOFTWARE.
 
 #include <stdio.h>
 #include <string.h>
+#include "lang.h"
 
 static void usage(void)
 {
         printf(
-                "Usage: [ops...] <command> <command args...>\n"
+                "%s: [ops...] <%s> <%s...>\n"
                 "\n"
-                "Options:\n"
-                "        --help, -h      Display help message.\n"
-                "        --version, -v   Displays version.\n"
+                "%s:\n"
+                "        --help, -h      %s.\n"
+                "        --version, -v   %s.\n",
+                _("Usage"), _("Command"), _("Command args"), _("Commands"),
+                _("Displays help message"), _("Displays version")
         );
 }
 
@@ -90,7 +93,8 @@ int main(int argc, char *argv[])
                 if (h || v)
                         break;
 
-                (void)fprintf(stderr, "Fatal error: unknown option given: '");
+                (void)fprintf(stderr, "%s: %s: '",
+                        _("Fatal error"), _("unknown option given"));
                 if (opt_long)
                         (void)fprintf(stderr, "%s", arg);
                 else
@@ -111,12 +115,13 @@ int main(int argc, char *argv[])
         if (cmd == -1)
                 goto error_no_command;
         (void)fprintf(stderr,
-                        "Fatal error: unknown command given: '%s'\n", 
-                        argv[i]
+                        "%s: %s: '%s'\n", 
+                        _("Fatal error"), _("unknown command given"), argv[i]
                      );
         return 1;
 
 error_no_command:
-        (void)fprintf(stderr, "Fatal error: no command given\n");
+        (void)fprintf(stderr, "%s: %s\n",
+                _("Fatal error"), _("no command given"));
         return 1;
 }
