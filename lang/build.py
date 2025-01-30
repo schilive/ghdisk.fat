@@ -8,12 +8,23 @@ R_STRS = r'((?:' + R_STR + r'\s*)+)'                        # Captures the serie
 
 
 class CString:
+    def _assert(self):
+        assert(type(self) == CString)
+        assert(type(self.msgid) == str)
+        assert(type(self.indexes) == list)
+        assert(len(self.indexes) == 2)
+        for i in self.indexes:
+            assert(type(i) == int)
+
     def __init__(self, msgid: str, indexes: list[int]):
         self.msgid = msgid
         self.indexes = indexes
+        self._assert()
 
 
 def parse_c_file(file: str, keyword: str = '_') -> list[CString]:
+    assert(type(file) == str)
+    assert(type(keyword) == str)
     r = rf'\b{keyword}\b\s*(?:\(+)\s*{R_STRS}\s*(?:\)+)\s*(?=[,)])'
 
     strings: set[str] = []
@@ -28,19 +39,33 @@ def parse_c_file(file: str, keyword: str = '_') -> list[CString]:
         strings.append(string)
         result.append(CString(string, [m_strs.start(0), m_strs.end(0)]))
         print(f'STR = {string} = {file[result[-1].indexes[0]:result[-1].indexes[1]]}')
+
+    assert(type(result) == list)
+    for i in result:
+        assert(type(i) == CString)
+        i._assert()
     return result
 
 
 def generate_template(cs: list[CString]) -> str:
+    assert(type(cs) == list)
+    for c in cs:
+        assert(type(c) == CString)
+        c._assert()
+
     out = ''
     for c in cs:
         out += f'msgid "{c.msgid}"\n'
         out += f'msgstr ""\n'
         out += '\n'
+    assert(type(out) == str)
     return out
 
 
 def cmd_make_template(c_filepath: str, tmpl_filepath: str):
+    assert(type(c_filepath) == str)
+    assert(type(tmpl_filepath) == str)
+
     c_file = open(c_filepath, 'rt')
     c_content = c_file.read()
     c_file.close()
@@ -84,7 +109,6 @@ def main():
     else:
         print(f'Fatal error: unknown command: \'{command}\'',file=sys.stderr)
         sys.exit(1)
-
     return
 
 
