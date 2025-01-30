@@ -1,5 +1,6 @@
 import sys
 import re
+import collections
 
 
 # The following regexes/regeces/regrets have each one capturing group
@@ -11,14 +12,18 @@ class CString:
     def _assert(self):
         assert(type(self) == CString)
         assert(type(self.msgid) == str)
-        assert(type(self.indexes) == list)
-        assert(len(self.indexes) == 2)
-        for i in self.indexes:
-            assert(type(i) == int)
+        if self.indexes is not None:
+            assert(type(self.indexes) == list)
+            assert(len(self.indexes) == 2)
+            for i in self.indexes:
+                assert(type(i) == int)
+        if self.msgstr is not None:
+            assert(type(self.msgstr) == str)
 
-    def __init__(self, msgid: str, indexes: list[int]):
+    def __init__(self, msgid: str, indexes: list[int] | None = None, msgstr: str | None = None):
         self.msgid = msgid
         self.indexes = indexes
+        self.msgstr = msgstr
         self._assert()
 
 
@@ -38,7 +43,22 @@ def parse_c_file(file: str, keyword: str = '_') -> list[CString]:
             continue
         strings.append(string)
         result.append(CString(string, [m_strs.start(0), m_strs.end(0)]))
-        print(f'STR = {string} = {file[result[-1].indexes[0]:result[-1].indexes[1]]}')
+        #print(f'STR = {string} = {file[result[-1].indexes[0]:result[-1].indexes[1]]}')
+
+    assert(type(result) == list)
+    for i in result:
+        assert(type(i) == CString)
+        i._assert()
+    return result
+
+
+def parse_translate(trans_file: str):
+    r = r'^\s*msgid\s*' + R_STR + r'\s*^\s*msgstr\s*' + R_STR + r'\s*'
+    result: list[CString] = []
+    for m in re.finditer(r, trans_file, flags=re.M):
+        msgid = m.groups()[0]
+        msgstr = m.groups()[1]
+        result.append(CString(msgid, msgstr=msgstr))
 
     assert(type(result) == list)
     for i in result:
@@ -62,6 +82,31 @@ def generate_template(cs: list[CString]) -> str:
     return out
 
 
+def replace_c_file(c_file: str, c_cstrs: list[CString]) -> str:
+    assert(type(c_file) == str)
+    assert(type(c_cstrs) == list)
+    for i in c_cstrs:
+        i._assert()
+
+
+    indexes: dict = dict({})
+    for n, c in enumerate(c_cstrs):
+        indexes[c.indexes[0]] = n
+    # Totally my idea, not from SO, 100%, no cap
+    indexes = dict(collections.OrderedDict(sorted(indexes.items())))
+
+    #print(indexes)
+    for i in reversed(indexes):
+        c = c_cstrs[indexes[i]]
+        st = c.indexes[0]
+        end = c.indexes[1]
+        trans = c.msgstr
+
+        c_file = c_file[:st] + '"' + trans + '"' + c_file[end:]
+        #print(f"{st}:{end}: {c_file[st:end]}: {trans}")
+    return c_file
+
+
 def cmd_make_template(c_filepath: str, tmpl_filepath: str):
     assert(type(c_filepath) == str)
     assert(type(tmpl_filepath) == str)
@@ -77,11 +122,46 @@ def cmd_make_template(c_filepath: str, tmpl_filepath: str):
     tmpl_file.close()
 
 
+def cmd_replace(trans_filepath: str, c_filepath: str):
+    assert(type(trans_filepath) == str)
+    assert(type(c_filepath) == str)
+
+    trans_file = open(trans_filepath, 'rt')
+    trans_content = trans_file.read()
+    trans_file.close()
+    trans_cstrs = parse_translate(trans_content)
+
+    c_file = open(c_filepath, 'rt')
+    c_content = c_file.read()
+    c_file.close()
+    c_cstrs = parse_c_file(c_content)
+
+    if len(c_cstrs) == len(trans_cstrs):
+        for c in trans_cstrs:
+            for C in c_cstrs:
+                if C.msgid == c.msgid:
+                    C.msgstr = c.msgstr
+                    break
+            else:
+                print('Fatal error: translations in C file and translation file do not match', file=sys.stderr)
+                sys.exit(1)
+    else:
+        print('Fatal error: translations in C file and translation file do not match', file=sys.stderr)
+        sys.exit(1)
+    #for c in c_cstrs:
+    #    print(c.__dict__)
+
+    c_content = replace_c_file(c_content, c_cstrs)
+    c_file = open(c_filepath, 'wt')
+    c_file.write(c_content)
+    c_file.close()
+
 def main():
     if len(sys.argv) <= 1:
         print('Usage: <command> [<subcommand>] [<args...>]')
         print('Commands:')
         print('\tmake template <c_filepath> <outout template filepath>')
+        print('\treplace <trans filepath> <c filepath>')
         print('')
         return
     command = sys.argv[1]
@@ -106,6 +186,13 @@ def main():
         else:
             print(f'Fatal error: unknown subcommand: \'{subcommand}\'',file=sys.stderr)
             sys.exit(1)
+    elif command == 'replace':
+        if len(sys.argv) <= 3:
+            print('Fatal error: required inputs not given', file=sys.stderr)
+            sys.exit(1)
+        c_file = sys.argv[2]
+        trans_file = sys.argv[3]
+        cmd_replace(trans_file, c_file)
     else:
         print(f'Fatal error: unknown command: \'{command}\'',file=sys.stderr)
         sys.exit(1)
