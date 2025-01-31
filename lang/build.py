@@ -58,7 +58,7 @@ def parse_translate(trans_file: str):
     for m in re.finditer(r, trans_file, flags=re.M):
         msgid = m.groups()[0]
         msgstr = m.groups()[1]
-        result.append(CString(msgid, msgstr=msgstr))
+        result.append(CString(msgid, msgstr=msgstr, indexes=[m.start(0), m.end(0)]))
 
     assert(type(result) == list)
     for i in result:
@@ -156,12 +156,69 @@ def cmd_replace(trans_filepath: str, c_filepath: str):
     c_file.write(c_content)
     c_file.close()
 
+
+def cmd_update_template(c_filepath: str, tmpl_filepath: str):
+    assert(type(c_filepath) == str)
+    assert(type(tmpl_filepath) == str)
+
+    c_file = open(c_filepath, 'rt')
+    c_cstrs = parse_c_file(c_file.read())
+    c_file.close()
+
+    tmpl_file = open(tmpl_filepath, 'rt')
+    tmpl_content = tmpl_file.read()
+    tmpl_cstrs = parse_translate(tmpl_content)
+    tmpl_file.close()
+
+    new_msgs: list[CString] = []
+    for c in c_cstrs:
+        for C in tmpl_cstrs:
+            if C.msgid == c.msgid:
+                break
+        else:
+            new_msgs.append(c)
+    #for i in new_msgs:
+    #    print(i.__dict__)
+
+    unused_msgs: list[CString] = []
+    for c in tmpl_cstrs:
+        for C in c_cstrs:
+            if C.msgid == c.msgid:
+                break
+        else:
+            unused_msgs.append(c)
+    #for i in unused_msgs:
+    #    print(i.__dict__)
+
+    if len(unused_msgs) == 0:
+        print('Note: nothing to remove!')
+    else:
+        for m in unused_msgs:
+            print(m.__dict__)
+            print(tmpl_content[m.indexes[0]:m.indexes[1]])
+            tmpl_content = tmpl_content[:m.indexes[0]] + tmpl_content[m.indexes[1]:]
+        tmpl_file = open(tmpl_filepath, 'wt')
+        tmpl_file.write(tmpl_content)
+        tmpl_file.close()
+        print(f'Note: {len(unused_msgs)} messages removed')
+
+    if len(new_msgs) == 0:
+        print('Note: nothing to add!')
+    else:
+        tmpl_content = '\n' + generate_template(new_msgs)
+        tmpl_file = open(tmpl_filepath, 'at')
+        tmpl_file.write(tmpl_content)
+        tmpl_file.close()
+        print(f'Note: {len(new_msgs)} messages added')
+
+
 def main():
     if len(sys.argv) <= 1:
         print('Usage: <command> [<subcommand>] [<args...>]')
         print('Commands:')
         print('\tmake template <c_filepath> <outout template filepath>')
         print('\treplace <trans filepath> <c filepath>')
+        print('\tupdate template <trans filepath> <c filepath>')
         print('')
         return
     command = sys.argv[1]
@@ -169,9 +226,9 @@ def main():
     
     if command == 'make':
         if len(sys.argv) <= 2:
-            print('\tmake template <c_filepath> <outout template filepath>')
+            print('\tmake <subcommand>')
             print('Subcommands:')
-            print('\ttemplate')
+            print('\ttemplate <c filepath> <output template filepath>')
             print('')
             return
         subcommand = sys.argv[2]
@@ -193,6 +250,25 @@ def main():
         c_file = sys.argv[2]
         trans_file = sys.argv[3]
         cmd_replace(trans_file, c_file)
+    elif command == 'update':
+        if len(sys.argv) <= 2:
+            print('\tmake template <subcommand>')
+            print('Subcommands:')
+            print('\ttemplate <c_filepath> <outout template filepath>')
+            print('')
+            return
+        subcommand = sys.argv[2]
+
+        if subcommand == 'template':
+            if len(sys.argv) <= 4:
+                print('Fatal error: required inputs not given', file=sys.stderr)
+                sys.exit(1)
+            c_file = sys.argv[3]
+            tmpl_file = sys.argv[4]
+            cmd_update_template(c_file, tmpl_file)
+        else:
+            print(f'Fatal error: unknown subcommand: \'{subcommand}\'',file=sys.stderr)
+            sys.exit(1)
     else:
         print(f'Fatal error: unknown command: \'{command}\'',file=sys.stderr)
         sys.exit(1)
