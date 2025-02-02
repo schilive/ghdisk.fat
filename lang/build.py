@@ -191,9 +191,10 @@ def cmd_replace_c_file(pot_filepath: str, c_filepath: str):
     c_file.close()
 
 
-def cmd_update_pot(c_filepath: str, pot_filepath: str):
+def cmd_update_pot(c_filepath: str, pot_filepath: str, dry: bool = False):
     assert(type(c_filepath) == str)
     assert(type(pot_filepath) == str)
+    changed: bool = False
 
     c_file = open(c_filepath, 'rt')
     c_content = c_file.read()
@@ -210,6 +211,7 @@ def cmd_update_pot(c_filepath: str, pot_filepath: str):
             continue
         c = c_cs.strings[string][0]
         pot_content += generate_pot([string])
+        changed = True
         #print(f'NOT PRESENT: {c.__dict__}')
         print(f'Note: message not translated: \'{c.string}\'', file=sys.stderr)
 
@@ -219,6 +221,7 @@ def cmd_update_pot(c_filepath: str, pot_filepath: str):
             continue
         p = pot_ps.dict[string]
         pot_remove_locations.append([p.location[0], p.location[1]])
+        changed = True
         #print(f'USELESS: {p.__dict__}')
         print(f'Note: useless message : \'{p.msgid}\'', file=sys.stderr)
     # Vide 'cmd_replace_c_file()'
@@ -226,14 +229,19 @@ def cmd_update_pot(c_filepath: str, pot_filepath: str):
     for l in pot_remove_locations:
         pot_content = pot_content[:l[0]] + pot_content[l[1]:]
 
-    pot_file = open(pot_filepath, 'wt')
-    pot_file.write(pot_content)
-    pot_file.close()
+    if dry:
+        if changed:
+            sys.exit(1)
+    else:
+        pot_file = open(pot_filepath, 'wt')
+        pot_file.write(pot_content)
+        pot_file.close()
 
 
-def cmd_update_po(pot_filepath: str, po_filepath: str):
+def cmd_update_po(pot_filepath: str, po_filepath: str, dry: bool = False):
     assert(type(pot_filepath) == str)
     assert(type(po_filepath) == str)
+    changed: bool = False
 
     pot_content = open_read_validate_pot(pot_filepath)
     po_content = open_read_validate_pot(po_filepath)
@@ -245,6 +253,7 @@ def cmd_update_po(pot_filepath: str, po_filepath: str):
         if string in po_ps.dict:
             continue
         p = pot_ps.dict[string]
+        changed = True
         print(f'Note: message not translated: \'{p.msgid}\'', file=sys.stderr)
         po_content += generate_pot([string])
 
@@ -253,15 +262,20 @@ def cmd_update_po(pot_filepath: str, po_filepath: str):
         if string in pot_ps.dict:
             continue
         p = po_ps.dict[string]
+        changed = True
         print(f'Note: useless message : \'{p.msgid}\'', file=sys.stderr)
         po_remove_locations.append(p.location)
     po_remove_locations.sort(key=lambda x: x[0], reverse=True)
     for l in po_remove_locations:
         po_content = po_content[:l[0]] + po_content[l[1]:]
 
-    po_file = open(po_filepath, 'wt')
-    po_file.write(po_content)
-    po_file.close()
+    if dry:
+        if changed:
+            sys.exit(1)
+    else:
+        po_file = open(po_filepath, 'wt')
+        po_file.write(po_content)
+        po_file.close()
 
 
 def main():
@@ -276,12 +290,19 @@ def main():
         sys.exit(0)
     command = sys.argv[1]
     command_argv = sys.argv[2:]
+    dry: bool = False
     if len(command_argv) < 2:
         print('Fatal error: required arguments not given', file=sys.stderr)
         sys.exit(1)
-    elif len(command_argv) > 2:
+    elif (len(command_argv) > 2 and command not in ['update_pot', 'update_po']) or len(command_argv) > 3:
         print('Fatal error: too many argument given', file=sys.stderr)
         sys.exit(1)
+    elif command in ['update_pot', 'update_po'] and len(command_argv) >= 3:
+        n = command_argv[2]
+        if n != '-n':
+            print(f'Fatal error: unknown option: \'{n}\'')
+            sys.exit(1)
+        dry = True
 
     if command == 'make_pot':
         c_file = command_argv[0]
@@ -294,11 +315,11 @@ def main():
     elif command == 'update_pot':
         c_file = command_argv[0]
         pot_file = command_argv[1]
-        cmd_update_pot(c_file, pot_file)
+        cmd_update_pot(c_file, pot_file, dry)
     elif command == 'update_po':
         pot_file = command_argv[0]
         po_file = command_argv[1]
-        cmd_update_po(pot_file, po_file)
+        cmd_update_po(pot_file, po_file, dry)
     else:
         print(f'Fatal error: unknown command: \'{command}\'', file=sys.stderr)
         sys.exit(1)
