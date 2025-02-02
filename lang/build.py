@@ -125,6 +125,16 @@ def generate_pot(msgids: list[str]) -> str:
     return r
 
 
+def open_read_validate_pot(filepath: str) -> str:
+    assert(type(filepath) == str)
+    f = open(filepath)
+    content = f.read()
+    f.close()
+
+    assert(re.fullmatch(fr'{R_MSG}*', content, flags=re.M) is not None)
+    return content
+
+
 def cmd_make_pot(c_filepath: str, pot_filepath: str):
     assert(type(c_filepath) == str)
     assert(type(pot_filepath) == str)
@@ -145,9 +155,7 @@ def cmd_replace_c_file(pot_filepath: str, c_filepath: str):
     assert(type(c_filepath) == str)
     assert(type(pot_filepath) == str)
 
-    pot_file = open(pot_filepath,  'rt')
-    pot_content = pot_file.read()
-    pot_file.close()
+    pot_content = open_read_validate_pot(pot_filepath)
 
     pot_ps = parse_pot(pot_content)
     del pot_content
@@ -186,10 +194,7 @@ def cmd_update_pot(c_filepath: str, pot_filepath: str):
     c_cs = parse_c_file(c_content)
     del c_content
 
-    pot_file = open(pot_filepath, 'rt')
-    pot_content = pot_file.read()
-    pot_file.close()
-
+    pot_content = open_read_validate_pot(pot_filepath)
     pot_ps = parse_pot(pot_content)
 
     for string in c_cs.strings:
@@ -222,13 +227,8 @@ def cmd_update_po(pot_filepath: str, po_filepath: str):
     assert(type(pot_filepath) == str)
     assert(type(po_filepath) == str)
 
-    pot_file = open(pot_filepath, 'rt')
-    po_file = open(po_filepath, 'rt')
-    pot_content = pot_file.read()
-    po_content = po_file.read()
-    pot_file.close()
-    po_file.close()
-
+    pot_content = open_read_validate_pot(pot_filepath)
+    po_content = open_read_validate_pot(po_filepath)
     pot_ps = parse_pot(pot_content)
     po_ps = parse_pot(po_content)
     del pot_content
