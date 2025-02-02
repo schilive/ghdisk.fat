@@ -159,7 +159,7 @@ def cmd_replace_c_file(pot_filepath: str, c_filepath: str):
 
     pot_ps = parse_pot(pot_content)
     del pot_content
-    print(pot_ps.__dict__)
+    #print(pot_ps.__dict__)
 
     c_file = open(c_filepath, 'rt')
     c_content = c_file.read()
