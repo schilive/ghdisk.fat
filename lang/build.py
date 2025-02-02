@@ -7,8 +7,12 @@ G_KEYWORD = '_'
 R_STR = r'(?:(?<!\\)"' + r'((?:(?!\\|").|\\.|\s)*)' + r'")'             # Captures the string content
 R_STRS = r'((?:' + R_STR + r'\s*)+)'                                    # " the series of strings
 R_CSTRS = rf'\b{G_KEYWORD}\b\s*(?:\(+)\s*{R_STRS}\s*(?:\)+)\s*(?=[,)])' # " " " " " as the 1st parm in the func keyword
-## The following regex also matches the space after until before the line of the next message
-R_MSG = r'(?:(?:^|(?:\n*))\s*msgid\s*' + R_STR + r'\s*(?:^|(?:\n*))\s*msgstr\s*' + R_STR + r'\s*)'   # " the msgid and msgstr strings
+
+
+R_MSGID = r'(?:(?:^|\n)(?!\n)\s*msgid\s*' + R_STR + r')'    # Captures the string content
+R_MSGSTR = r'(?:(?:^|\n)(?!\n)\s*msgstr\s*' + R_STR + r')'  # Captures the string content
+R_MSG = r'(?:' + R_MSGID + r'\s*?\n*\s*' + R_MSGSTR + r')'  # " " " " of msgid and msgstr
+R_MSGLN = fr'(?:{R_MSG}\s*(?!(?:(?!\n)\s)*.))'              # Contains R_MSG
 
 
 class CString:
@@ -104,7 +108,7 @@ def parse_pot(content: str) -> PotStrings:
     assert(type(content) == str)
 
     result: PotStrings = PotStrings()
-    for m in re.finditer(R_MSG, content):
+    for m in re.finditer(R_MSGLN, content):
         msgid = m.groups()[0]
         msgstr = m.groups()[1]
         location = [m.start(), m.end()]
@@ -134,19 +138,8 @@ def open_read_validate_pot(filepath: str) -> str:
     content = f.read()
     f.close()
 
-    valid: bool = True
-    last_end: int = None
-    for m in re.finditer(R_MSG, content):
-        if last_end == None and m.start() != 0:
-            valid = False
-            break
-        elif m.end() != last_end:
-            valid = False
-            break
-        last_end = m.end()
-    if not valid:
+    if re.fullmatch(rf'{R_MSGLN}*', content) is None:
         print(f'Fatal error: PO file has invalid syntax: \'{filepath}\'', file=sys.stderr)
-    sys.exit(1)
     return content
 
 
