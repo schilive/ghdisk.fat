@@ -4,23 +4,24 @@ import re
 
 G_KEYWORD = '_'
 # The following regexes/regeces/regrets have each one or more capturing groups
-R_STR = r'(?:(?<!\\)"' + r'((?:(?!\\|").|\\.|\s)*)' + r'")'             # Captures the string content
-R_STRS = r'((?:' + R_STR + r'\s*)+)'                                    # " the series of strings
-R_CSTRS = rf'\b{G_KEYWORD}\b\s*(?:\(+)\s*{R_STRS}\s*(?:\)+)\s*(?=[,)])' # " " " " " as the 1st parm in the func keyword
+R_STR = r'(?:(?<!\\)"' + r'((?:(?!\\|").|\\.|\s)*)' + r'")' # Captures the string content
+R_STRS = r'((?:' + R_STR + r'\s*)+)'                        # " the series of strings
+R_CSTRS = r'\b' + G_KEYWORD + r'\b\s*(?:\(+)\s*'\
+    + R_STRS + r'\s*(?:\)+)\s*(?=[,)])'                     # " " " " " as the 1st parm in the func keyword
 
 
 R_MSGID = r'(?:(?:^|\n)(?!\n)\s*msgid\s*' + R_STR + r')'    # Captures the string content
 R_MSGSTR = r'(?:(?:^|\n)(?!\n)\s*msgstr\s*' + R_STR + r')'  # Captures the string content
 R_MSG = r'(?:' + R_MSGID + r'\s*?\n*\s*' + R_MSGSTR + r')'  # " " " " of msgid and msgstr
-R_MSGLN = fr'(?:{R_MSG}\s*(?!(?:(?!\n)\s)*.))'              # Contains R_MSG
+R_MSGLN = r'(?:' + R_MSG + r'\s*(?!(?:(?!\n)\s)*.))'        # Contains R_MSG
 
 
 class CString:
-    def set_string(self, string: str):
+    def set_string(self, string):
         assert(type(string) == str)
         self.string = string
 
-    def set_location(self, location: list[int]):
+    def set_location(self, location):
         assert(type(location) == list)
         assert(len(location) == 2)
         for i in location:
@@ -28,13 +29,13 @@ class CString:
         location[1] >= location[0]
         self.location = location
 
-    def __init__(self, string: str, location: list[int]):
+    def __init__(self, string, location):
         self.set_string(string)
         self.set_location(location)
 
 
 class CStrings:
-    def add(self, c: CString):
+    def add(self, c):
         assert(type(c) == CString)
         self.list.append(c)
         if c.string in self.strings:
@@ -42,7 +43,7 @@ class CStrings:
         else:
             self.strings[c.string] = [c]
 
-    def __init__(self, cs: list[CString] | None = None):
+    def __init__(self, cs = None):
         if cs is None:
             cs = []
         self.list = []
@@ -52,15 +53,15 @@ class CStrings:
 
 
 class PotString:
-    def set_msgid(self, msgid: str):
+    def set_msgid(self, msgid):
         assert(type(msgid) == str)
         self.msgid = msgid
 
-    def set_msgstr(self, msgstr: str):
+    def set_msgstr(self, msgstr):
         assert(type(msgstr) == str)
         self.msgstr = msgstr
 
-    def set_location(self, location: list[int]):
+    def set_location(self, location):
         assert(type(location) == list)
         assert(len(location) == 2)
         for i in location:
@@ -68,19 +69,19 @@ class PotString:
         location[1] >= location[0]
         self.location = location
 
-    def __init__(self, msgid: str, msgstr: str, location: list[int]):
+    def __init__(self, msgid, msgstr, location):
         self.set_msgid(msgid)
         self.set_msgstr(msgstr)
         self.set_location(location)
 
 
 class PotStrings:
-    def add(self, p: PotString):
+    def add(self, p):
         assert(type(p) == PotString)
         assert(p.msgid not in self.dict)
         self.dict[p.msgid] = p
 
-    def __init__(self, ps: list[PotString] | None = None):
+    def __init__(self, ps = None):
         if ps is None:
             ps = []
         self.dict = dict({})
@@ -88,10 +89,10 @@ class PotStrings:
             self.add(p)
     
 
-def parse_c_file(content: str) -> CStrings:
+def parse_c_file(content):
     assert(type(content) == str)
 
-    result: CStrings = CStrings()
+    result = CStrings()
     for m_strs in re.finditer(R_CSTRS, content):
         strs = m_strs.groups()[0]
         start = m_strs.start()
@@ -104,46 +105,46 @@ def parse_c_file(content: str) -> CStrings:
     return result
 
 
-def parse_pot(content: str) -> PotStrings:
+def parse_pot(content) -> PotStrings:
     assert(type(content) == str)
 
-    result: PotStrings = PotStrings()
+    result = PotStrings()
     for m in re.finditer(R_MSGLN, content):
         msgid = m.groups()[0]
         msgstr = m.groups()[1]
         location = [m.start(), m.end()]
         #print(f'MSG = ({msgid}, {msgstr}, {location})')
         if msgid in result.dict:
-            print(f'Fatal error: PO file has 2 or more translations of the same message: \'{msgid}\'', file=sys.stderr)
+            print('Fatal error: PO file has 2 or more translations of the same message: \'' + msgid + '\'', file=sys.stderr)
             sys.exit(1)
         result.add(PotString(msgid, msgstr, location))
     return result
 
 
-def generate_pot(msgids: list[str]) -> str:
+def generate_pot(msgids):
     assert(type(msgids) == list)
     for i in msgids:
         assert(type(i) == str)
     r = ''
     for msgid in msgids:
-        r += f'msgid "{msgid}"\n'
+        r += 'msgid "' + msgid + '"\n'
         r += 'msgstr ""\n'
         r += '\n'
     return r
 
 
-def open_read_validate_pot(filepath: str) -> str:
+def open_read_validate_pot(filepath):
     assert(type(filepath) == str)
     f = open(filepath)
     content = f.read()
     f.close()
 
-    if re.fullmatch(rf'{R_MSGLN}*', content) is None:
-        print(f'Fatal error: PO file has invalid syntax: \'{filepath}\'', file=sys.stderr)
+    if re.match('^' + R_MSGLN + '*$', content) is None:
+        print('Fatal error: PO file has invalid syntax: \'' + filepath + '\'', file=sys.stderr)
     return content
 
 
-def cmd_make_pot(c_filepath: str, pot_filepath: str):
+def cmd_make_pot(c_filepath, pot_filepath):
     assert(type(c_filepath) == str)
     assert(type(pot_filepath) == str)
 
@@ -159,7 +160,7 @@ def cmd_make_pot(c_filepath: str, pot_filepath: str):
     pot_file.close()
 
 
-def cmd_replace_c_file(pot_filepath: str, c_filepath: str):
+def cmd_replace_c_file(pot_filepath, c_filepath):
     assert(type(c_filepath) == str)
     assert(type(pot_filepath) == str)
 
@@ -191,10 +192,10 @@ def cmd_replace_c_file(pot_filepath: str, c_filepath: str):
     c_file.close()
 
 
-def cmd_update_pot(c_filepath: str, pot_filepath: str, dry: bool = False):
+def cmd_update_pot(c_filepath, pot_filepath, dry = False):
     assert(type(c_filepath) == str)
     assert(type(pot_filepath) == str)
-    changed: bool = False
+    changed = False
 
     c_file = open(c_filepath, 'rt')
     c_content = c_file.read()
@@ -213,9 +214,9 @@ def cmd_update_pot(c_filepath: str, pot_filepath: str, dry: bool = False):
         pot_content += generate_pot([string])
         changed = True
         #print(f'NOT PRESENT: {c.__dict__}')
-        print(f'Note: message not translated: \'{c.string}\'', file=sys.stderr)
+        print('Note: message not translated: \'' + c.string + '\'', file=sys.stderr)
 
-    pot_remove_locations: list[list[int]] = []
+    pot_remove_locations = []
     for string in pot_ps.dict:
         if string in c_cs.strings:
             continue
@@ -223,7 +224,7 @@ def cmd_update_pot(c_filepath: str, pot_filepath: str, dry: bool = False):
         pot_remove_locations.append([p.location[0], p.location[1]])
         changed = True
         #print(f'USELESS: {p.__dict__}')
-        print(f'Note: useless message : \'{p.msgid}\'', file=sys.stderr)
+        print('Note: useless message : \'' + p.msgid + '\'', file=sys.stderr)
     # Vide 'cmd_replace_c_file()'
     pot_remove_locations.sort(key=lambda x: x[0], reverse=True)
     for l in pot_remove_locations:
@@ -238,10 +239,10 @@ def cmd_update_pot(c_filepath: str, pot_filepath: str, dry: bool = False):
         pot_file.close()
 
 
-def cmd_update_po(pot_filepath: str, po_filepath: str, dry: bool = False):
+def cmd_update_po(pot_filepath, po_filepath, dry = False):
     assert(type(pot_filepath) == str)
     assert(type(po_filepath) == str)
-    changed: bool = False
+    changed = False
 
     pot_content = open_read_validate_pot(pot_filepath)
     po_content = open_read_validate_pot(po_filepath)
@@ -254,16 +255,16 @@ def cmd_update_po(pot_filepath: str, po_filepath: str, dry: bool = False):
             continue
         p = pot_ps.dict[string]
         changed = True
-        print(f'Note: message not translated: \'{p.msgid}\'', file=sys.stderr)
+        print('Note: message not translated: \'' + p.msgid + '\'', file=sys.stderr)
         po_content += generate_pot([string])
 
-    po_remove_locations: list[list[int]] = []
+    po_remove_locations = []
     for string in po_ps.dict:
         if string in pot_ps.dict:
             continue
         p = po_ps.dict[string]
         changed = True
-        print(f'Note: useless message : \'{p.msgid}\'', file=sys.stderr)
+        print('Note: useless message : \'' + p.msgid + '\'', file=sys.stderr)
         po_remove_locations.append(p.location)
     po_remove_locations.sort(key=lambda x: x[0], reverse=True)
     for l in po_remove_locations:
@@ -290,7 +291,7 @@ def main():
         sys.exit(0)
     command = sys.argv[1]
     command_argv = sys.argv[2:]
-    dry: bool = False
+    dry = False
     if len(command_argv) < 2:
         print('Fatal error: required arguments not given', file=sys.stderr)
         sys.exit(1)
@@ -300,7 +301,7 @@ def main():
     elif command in ['update_pot', 'update_po'] and len(command_argv) >= 3:
         n = command_argv[2]
         if n != '-n':
-            print(f'Fatal error: unknown option: \'{n}\'')
+            print('Fatal error: unknown option: \'' + n + '\'')
             sys.exit(1)
         dry = True
 
@@ -321,7 +322,7 @@ def main():
         po_file = command_argv[1]
         cmd_update_po(pot_file, po_file, dry)
     else:
-        print(f'Fatal error: unknown command: \'{command}\'', file=sys.stderr)
+        print('Fatal error: unknown command: \'' + command + '\'', file=sys.stderr)
         sys.exit(1)
     sys.exit(0)
 
