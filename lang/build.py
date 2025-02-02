@@ -214,7 +214,45 @@ def cmd_update_pot(c_filepath: str, pot_filepath: str):
     pot_file = open(pot_filepath, 'wt')
     pot_file.write(pot_content)
     pot_file.close()
-    
+
+
+def cmd_update_po(pot_filepath: str, po_filepath: str):
+    assert(type(pot_filepath) == str)
+    assert(type(po_filepath) == str)
+
+    pot_file = open(pot_filepath, 'rt')
+    po_file = open(po_filepath, 'rt')
+    pot_content = pot_file.read()
+    po_content = po_file.read()
+    pot_file.close()
+    po_file.close()
+
+    pot_ps = parse_pot(pot_content)
+    po_ps = parse_pot(po_content)
+    del pot_content
+
+    for string in pot_ps.dict:
+        if string in po_ps.dict:
+            continue
+        p = pot_ps.dict[string]
+        print(f'Note: message not translated: \'{p.msgid}\'', file=sys.stderr)
+        po_content += generate_pot(CStrings([CString(p.msgid, [0, 0])]))
+
+    po_remove_locations: list[list[int]] = []
+    for string in po_ps.dict:
+        if string in pot_ps.dict:
+            continue
+        p = po_ps.dict[string]
+        print(f'Note: useless message : \'{p.msgid}\'', file=sys.stderr)
+        po_remove_locations.append(p.location)
+    po_remove_locations.sort(key=lambda x: x[0], reverse=True)
+    for l in po_remove_locations:
+        po_content = po_content[:l[0]] + po_content[l[1]:]
+
+    po_file = open(po_filepath, 'wt')
+    po_file.write(po_content)
+    po_file.close()
+
 
 def main():
     if len(sys.argv) <= 1:
@@ -223,6 +261,7 @@ def main():
         print('\tmake_pot <c_file> <pot_file>')
         print('\treplace_c_file <pot_file> <c_file>')
         print('\tupdate_pot <c_file> <pot_file>')
+        print('\tupdate_po <pot_file> <po_file>')
         print('')
         sys.exit(0)
     command = sys.argv[1]
@@ -246,6 +285,10 @@ def main():
         c_file = command_argv[0]
         pot_file = command_argv[1]
         cmd_update_pot(c_file, pot_file)
+    elif command == 'update_po':
+        pot_file = command_argv[0]
+        po_file = command_argv[1]
+        cmd_update_po(pot_file, po_file)
     else:
         print(f'Fatal error: unknown command: \'{command}\'', file=sys.stderr)
         sys.exit(1)
