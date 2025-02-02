@@ -113,10 +113,12 @@ def parse_pot(content: str) -> PotStrings:
     return result
 
 
-def generate_pot(cs: CStrings) -> str:
-    assert(type(cs) == CStrings)
+def generate_pot(msgids: list[str]) -> str:
+    assert(type(msgids) == list)
+    for i in msgids:
+        assert(type(i) == str)
     r = ''
-    for msgid in cs.strings:
+    for msgid in msgids:
         r += f'msgid "{msgid}"\n'
         r += 'msgstr ""\n'
         r += '\n'
@@ -132,7 +134,7 @@ def cmd_make_pot(c_filepath: str, pot_filepath: str):
     c_file.close()
 
     c_cs = parse_c_file(c_content)
-    pot_content = generate_pot(c_cs)
+    pot_content = generate_pot(list(c_cs.strings.keys()))
 
     pot_file = open(pot_filepath, 'wt')
     pot_file.write(pot_content)
@@ -194,7 +196,7 @@ def cmd_update_pot(c_filepath: str, pot_filepath: str):
         if string in pot_ps.dict:
             continue
         c = c_cs.strings[string][0]
-        pot_content += generate_pot(CStrings([c]))
+        pot_content += generate_pot([string])
         #print(f'NOT PRESENT: {c.__dict__}')
         print(f'Note: message not translated: \'{c.string}\'', file=sys.stderr)
 
@@ -236,7 +238,7 @@ def cmd_update_po(pot_filepath: str, po_filepath: str):
             continue
         p = pot_ps.dict[string]
         print(f'Note: message not translated: \'{p.msgid}\'', file=sys.stderr)
-        po_content += generate_pot(CStrings([CString(p.msgid, [0, 0])]))
+        po_content += generate_pot([string])
 
     po_remove_locations: list[list[int]] = []
     for string in po_ps.dict:
