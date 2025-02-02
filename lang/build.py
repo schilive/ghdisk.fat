@@ -8,7 +8,7 @@ R_STR = r'(?:(?<!\\)"' + r'((?:(?!\\|").|\\.|\s)*)' + r'")'             # Captur
 R_STRS = r'((?:' + R_STR + r'\s*)+)'                                    # " the series of strings
 R_CSTRS = rf'\b{G_KEYWORD}\b\s*(?:\(+)\s*{R_STRS}\s*(?:\)+)\s*(?=[,)])' # " " " " " as the 1st parm in the func keyword
 ## The following regex also matches the space after until before the line of the next message
-R_MSG = r'^\s*msgid\s*' + R_STR + r'\s*^\s*msgstr\s*' + R_STR + r'\s*'   # " the msgid and msgstr strings
+R_MSG = r'(?:(?:^|(?:\n*))\s*msgid\s*' + R_STR + r'\s*(?:^|(?:\n*))\s*msgstr\s*' + R_STR + r'\s*)'   # " the msgid and msgstr strings
 
 
 class CString:
@@ -104,7 +104,7 @@ def parse_pot(content: str) -> PotStrings:
     assert(type(content) == str)
 
     result: PotStrings = PotStrings()
-    for m in re.finditer(R_MSG, content, re.M):
+    for m in re.finditer(R_MSG, content):
         msgid = m.groups()[0]
         msgstr = m.groups()[1]
         location = [m.start(), m.end()]
@@ -131,7 +131,7 @@ def open_read_validate_pot(filepath: str) -> str:
     content = f.read()
     f.close()
 
-    assert(re.fullmatch(fr'{R_MSG}*', content, flags=re.M) is not None)
+    assert(re.fullmatch(fr'{R_MSG}*', content) is not None)
     return content
 
 
