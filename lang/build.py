@@ -7,6 +7,7 @@ G_KEYWORD = '_'
 R_STR = r'(?:(?<!\\)"' + r'((?:(?!\\|").|\\.|\s)*)' + r'")'             # Captures the string content
 R_STRS = r'((?:' + R_STR + r'\s*)+)'                                    # " the series of strings
 R_CSTRS = rf'\b{G_KEYWORD}\b\s*(?:\(+)\s*{R_STRS}\s*(?:\)+)\s*(?=[,)])' # " " " " " as the 1st parm in the func keyword
+## The following regex also matches the space after until before the line of the next message
 R_MSG = r'^\s*msgid\s*' + R_STR + r'\s*^\s*msgstr\s*' + R_STR + r'\s*'   # " the msgid and msgstr strings
 
 
@@ -172,12 +173,56 @@ def cmd_replace_c_file(pot_filepath: str, c_filepath: str):
     c_file.close()
 
 
+def cmd_update_pot(c_filepath: str, pot_filepath: str):
+    assert(type(c_filepath) == str)
+    assert(type(pot_filepath) == str)
+
+    c_file = open(c_filepath, 'rt')
+    c_content = c_file.read()
+    c_file.close()
+
+    c_cs = parse_c_file(c_content)
+    del c_content
+
+    pot_file = open(pot_filepath, 'rt')
+    pot_content = pot_file.read()
+    pot_file.close()
+
+    pot_ps = parse_pot(pot_content)
+
+    for string in c_cs.strings:
+        if string in pot_ps.dict:
+            continue
+        c = c_cs.strings[string][0]
+        pot_content += generate_pot(CStrings([c]))
+        #print(f'NOT PRESENT: {c.__dict__}')
+        print(f'Note: message not translated: \'{c.string}\'', file=sys.stderr)
+
+    pot_remove_locations: list[list[int]] = []
+    for string in pot_ps.dict:
+        if string in c_cs.strings:
+            continue
+        p = pot_ps.dict[string]
+        pot_remove_locations.append([p.location[0], p.location[1]])
+        #print(f'USELESS: {p.__dict__}')
+        print(f'Note: useless message : \'{p.msgid}\'', file=sys.stderr)
+    # Vide 'cmd_replace_c_file()'
+    pot_remove_locations.sort(key=lambda x: x[0], reverse=True)
+    for l in pot_remove_locations:
+        pot_content = pot_content[:l[0]] + pot_content[l[1]:]
+
+    pot_file = open(pot_filepath, 'wt')
+    pot_file.write(pot_content)
+    pot_file.close()
+    
+
 def main():
     if len(sys.argv) <= 1:
         print('Usage: <command> [<args...>]')
         print('Commands:')
         print('\tmake_pot <c_file> <pot_file>')
         print('\treplace_c_file <pot_file> <c_file>')
+        print('\tupdate_pot <c_file> <pot_file>')
         print('')
         sys.exit(0)
     command = sys.argv[1]
@@ -197,6 +242,10 @@ def main():
         pot_file = command_argv[0]
         c_file = command_argv[1]
         cmd_replace_c_file(pot_file, c_file)
+    elif command == 'update_pot':
+        c_file = command_argv[0]
+        pot_file = command_argv[1]
+        cmd_update_pot(c_file, pot_file)
     else:
         print(f'Fatal error: unknown command: \'{command}\'', file=sys.stderr)
         sys.exit(1)
