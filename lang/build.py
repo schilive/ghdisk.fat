@@ -109,6 +109,9 @@ def parse_pot(content: str) -> PotStrings:
         msgstr = m.groups()[1]
         location = [m.start(), m.end()]
         #print(f'MSG = ({msgid}, {msgstr}, {location})')
+        if msgid in result.dict:
+            print(f'Fatal error: PO file has 2 or more translations of the same message: \'{msgid}\'', file=sys.stderr)
+            sys.exit(1)
         result.add(PotString(msgid, msgstr, location))
     return result
 
@@ -131,7 +134,19 @@ def open_read_validate_pot(filepath: str) -> str:
     content = f.read()
     f.close()
 
-    assert(re.fullmatch(fr'{R_MSG}*', content) is not None)
+    valid: bool = True
+    last_end: int = None
+    for m in re.finditer(R_MSG, content):
+        if last_end == None and m.start() != 0:
+            valid = False
+            break
+        elif m.end() != last_end:
+            valid = False
+            break
+        last_end = m.end()
+    if not valid:
+        print(f'Fatal error: PO file has invalid syntax: \'{filepath}\'', file=sys.stderr)
+    sys.exit(1)
     return content
 
 
