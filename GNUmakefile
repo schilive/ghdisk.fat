@@ -5,7 +5,11 @@
 #  - C_: Constants.
 #  - V_: Modifiable only by Makefile.
 #
-#  Definitions are always written prefixed with "fn_". Their use and
+#  Definitions have two prefixes:
+#
+#  - fn_: Utility macro, OS-specific or tool-specific
+#
+#  are always written prefixed with "fn_". Their use and
 #  implications are explained by a comment directly above them.
 #
 
@@ -92,6 +96,31 @@ else
     endef
 endif
 
+# Copies one file to another location.
+# Usage: <src> <dest>
+ifeq ($(M_HOST_OS),WIN32)
+    define fn_copy
+        COPY /Y $(subst /,\,$(1)) $(subst /,\,$(2))
+    endef
+else
+    define fn_copy
+        cp -rf $(1) $(2)
+    endef
+endif
+
+# Executes Python with arguments. It seems that on UNIX, the python binary is
+# "python3", and on Windows, "python".
+# Usage: <arguments>
+ifeq ($(M_HOST_OS),WIN32)
+    define fn_python
+        python $(1)
+    endef
+else
+    define fn_python
+        python3 $(1)
+    endef
+endif
+
 ###
 ### 1.2. File and Directory Settings
 ###
@@ -99,6 +128,7 @@ endif
 M_TARGET ?= ghdisk.fat
 M_BUILD_DIR ?= build
 C_SRC_DIR := src
+C_PO_DIR := po
 
 ###
 ### 1.3. Compiler Settings
@@ -130,35 +160,43 @@ endif
 ## 1.3.1. Defining compiler-specific functions
 ##
 
-# Compiles C source file to an object file. The <input> must end in ".c" and the
-# output shouldn't end with $(V_O), since it will be added. This is necessary
-# because compilers often use the file extension to determine the file format,
-# and the object file extension is dependent on the compiler toolchain.
+# Compiles C source file to an object file. The suffix of the file <output>
+# should be $(V_O).
 #
 # Usage: <input>, <output>
 ifeq ($(M_COMPILER_MSVC),0)
     define fn_cc_obj
-        $(M_CC) $(M_CFLAGS) -c -o $(2)$(V_O) $(1)
+        $(M_CC) $(M_CFLAGS) -c -o $(2) $(1)
     endef
 else
     define fn_cc_obj
-        $(M_CC) $(M_CFLAGS) /c /Fo:$(2)$(V_O) $(1)
+        $(M_CC) $(M_CFLAGS) /c /Fo:$(2) $(1)
     endef
 endif
 
-# Links one or more object files to an executable. The <input> and <output>
-# shouldn't end with $(V_O) and $(V_E), since they will be added. This is
-# necessary because compilers often use the file extension to determine the file
-# format, and the object file is dependent on the compiler toolchain.
+# Links one or more object files to an executable. The suffix of the file
+# <input> should be $(V_O); and of <output>, $(V_E).
 #
 # Usage: <input> ..., <output>
 ifeq ($(M_COMPILER_MSVC),0)
     define fn_ld_exe
-        $(M_CC) $(M_CFLAGS) -o $(2)$(V_E) $(addsuffix $(V_O),$(1))
+        $(M_CC) $(M_CFLAGS) -o $(2) $(1)
     endef
 else
     define fn_ld_exe
-        $(M_LD) $(M_LFLAGS) /OUT:$(2)$(V_E) $(addsuffix $(V_O),$(1))
+        $(M_LD) $(M_LFLAGS) /OUT:$(2) $(1)
+    endef
+endif
+
+# Executes the processor of a C file. The suffix of the file <input>.
+# Usage: <input> <output>
+ifeq ($(M_COMPILER_MSVC),0)
+    define fn_cc_i
+        $(M_CC) $(M_CFLAGS) -E -o $(2) $(1)
+    endef
+else
+    define fn_cc_i
+        $(M_CC) $(M_CFLAGS) /P /Fi:$(2) $(1)
     endef
 endif
 
@@ -166,16 +204,34 @@ endif
 #### 2. Targets
 ####
 
-build: $(M_BUILD_DIR)/$(M_TARGET)$(V_E)
+build: $(M_BUILD_DIR)/$(if $(M_LANG),$(M_LANG)/)$(M_TARGET)$(V_E)
+
+ifeq ($(origin M_LANG),undefined)
+$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) | build_dir
+	$(call fn_ld_exe,$(word 1,$^),$@)
+
+$(M_BUILD_DIR)/ghdisk.fat$(V_O): $(C_SRC_DIR)/ghdisk.fat.c $(C_SRC_DIR)/lang.h | build_dir
+	$(call fn_cc_obj,$(word 1,$^),$@)
+else
+$(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_E): $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_O) | build_dir
+	$(call fn_ld_exe,$(word 1,$^),$@)
+
+$(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_O): $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.i | build_dir
+	$(call fn_cc_obj,$(word 1,$^),$@)
+
+$(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.i: $(M_BUILD_DIR)/ghdisk.fat.i $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po | build_dir
+	$(call fn_copy,$(word 1,$^),$@)
+	$(call fn_python,lang.py replace_c_file $(word 2,$^) $@)
+
+$(M_BUILD_DIR)/ghdisk.fat.i: $(C_SRC_DIR)/ghdisk.fat.c $(C_SRC_DIR)/lang.h | build_dir
+	$(call fn_cc_i,$(word 1,$^),$@)
+endif
+
+build_dir:
+	$(call fn_fmkdir,$(M_BUILD_DIR))
+	$(call fn_fmkdir,$(M_BUILD_DIR)/$(M_LANG))
 
 clean:
 	$(call fn_rmdir,$(M_BUILD_DIR))
 
-$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(C_SRC_DIR)/ghdisk.fat.c | build_dir
-	$(call fn_cc_obj,$(C_SRC_DIR)/ghdisk.fat.c,$(M_BUILD_DIR)/ghdisk.fat)
-	$(call fn_ld_exe,$(M_BUILD_DIR)/ghdisk.fat,$(M_BUILD_DIR)/$(M_TARGET))
-
-build_dir:
-	$(call fn_fmkdir,$(M_BUILD_DIR))
-
-.PHONY: build clean build_dir
+.PHONY: build build_dir clean

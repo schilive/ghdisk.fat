@@ -1,0 +1,30 @@
+msgid "unknown option given"
+msgstr ""
+
+msgid "Commands"
+msgstr ""
+
+msgid "no command given"
+msgstr ""
+
+msgid "Displays help message"
+msgstr ""
+
+msgid "Displays version"
+msgstr ""
+
+msgid "Fatal error"
+msgstr ""
+
+msgid "Command"
+msgstr ""
+
+msgid "Command args"
+msgstr ""
+
+msgid "Usage"
+msgstr ""
+
+msgid "unknown command given"
+msgstr ""
+
