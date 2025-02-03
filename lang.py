@@ -105,7 +105,7 @@ def parse_c_file(content):
     return result
 
 
-def parse_pot(content) -> PotStrings:
+def parse_pot(content: str, allow_empty: bool = True) -> PotStrings:
     assert(type(content) == str)
 
     result = PotStrings()
@@ -116,6 +116,9 @@ def parse_pot(content) -> PotStrings:
         #print(f'MSG = ({msgid}, {msgstr}, {location})')
         if msgid in result.dict:
             print('Fatal error: PO file has 2 or more translations of the same message: \'' + msgid + '\'', file=sys.stderr)
+            sys.exit(1)
+        if not allow_empty and len(msgstr) == 0:
+            print('Fatal error: Translation message is empty: msgid = \'' + msgid + '\'')
             sys.exit(1)
         result.add(PotString(msgid, msgstr, location))
     return result
@@ -166,7 +169,7 @@ def cmd_replace_c_file(pot_filepath, c_filepath):
 
     pot_content = open_read_validate_pot(pot_filepath)
 
-    pot_ps = parse_pot(pot_content)
+    pot_ps = parse_pot(pot_content, allow_empty=False)
     del pot_content
     #print(pot_ps.__dict__)
 
@@ -247,7 +250,7 @@ def cmd_update_po(pot_filepath, po_filepath, dry = False):
     pot_content = open_read_validate_pot(pot_filepath)
     po_content = open_read_validate_pot(po_filepath)
     pot_ps = parse_pot(pot_content)
-    po_ps = parse_pot(po_content)
+    po_ps = parse_pot(po_content, allow_empty = not dry)
     del pot_content
 
     for string in pot_ps.dict:
