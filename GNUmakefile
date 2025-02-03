@@ -219,12 +219,19 @@ $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_E): $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(
 $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_O): $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.i | build_dir
 	$(call fn_cc_obj,$(word 1,$^),$@)
 
-$(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.i: $(M_BUILD_DIR)/ghdisk.fat.i $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po | build_dir
+$(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.i: $(M_BUILD_DIR)/ghdisk.fat.i $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po | build_dir pot_uptodate_ghdisk.fat.c po_uptodate_ghdisk.fat.c_$(M_LANG)
 	$(call fn_copy,$(word 1,$^),$@)
 	$(call fn_python,lang.py replace_c_file $(word 2,$^) $@)
 
 $(M_BUILD_DIR)/ghdisk.fat.i: $(C_SRC_DIR)/ghdisk.fat.c $(C_SRC_DIR)/lang.h | build_dir
 	$(call fn_cc_i,$(word 1,$^),$@)
+
+pot_uptodate_ghdisk.fat.c:
+	$(call fn_python,lang.py update_pot $(C_SRC_DIR)/ghdisk.fat.c $(C_PO_DIR)/ghdisk.fat.pot -n)
+
+po_uptodate_ghdisk.fat.c_$(M_LANG):
+	$(call fn_python,lang.py update_po $(C_PO_DIR)/ghdisk.fat.pot $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po -n)
+
 endif
 
 build_dir:
@@ -234,4 +241,4 @@ build_dir:
 clean:
 	$(call fn_rmdir,$(M_BUILD_DIR))
 
-.PHONY: build build_dir clean
+.PHONY: build build_dir clean po_uptodate

@@ -43,7 +43,7 @@ static void usage(void)
 
 static void version(void)
 {
-        printf("Version 0.0.0");
+        printf("Version 0.0.0\n");
 }
 
 int main(int argc, char *argv[])
