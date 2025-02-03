@@ -136,7 +136,7 @@ def generate_pot(msgids):
     return r
 
 
-def open_read_validate_pot(filepath):
+def open_read_validate_pot(filepath: str):
     assert(type(filepath) == str)
     f = open(filepath)
     content = f.read()
