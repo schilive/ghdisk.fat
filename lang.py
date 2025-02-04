@@ -134,9 +134,13 @@ def parse_pot(content: str, allow_empty: bool = True) -> PotStrings:
             msgid = m.groups()[0]
             continue
 
+        if re.match(R_MTCMT, l) is not None:
+            empty_comment = True
+            continue
+
         m = re.match(R_MSGSTR, l)
         if m is None:
-            print('Fatal error: bad PO/POT file: unknown command in line \'' + str(ln) + '\'',file=sys.stderr)
+            print('Fatal error: bad PO/POT file: unknown command in line \'' + str(ln + 1) + '\'',file=sys.stderr)
             sys.exit(1)
         if msgid is None:
             print('Fatal error: bad PO/POT file: command \'msgstr\' is not used after a \'msgid\'',file=sys.stderr)
