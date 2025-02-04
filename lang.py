@@ -11,6 +11,7 @@ R_CSTRS = r'\b' + G_KEYWORD + r'\b\s*(?:\(+)\s*'\
 
 
 # The following regexes contain a string
+R_MTCMT = r'(?:(?:^|\n)(?!\n)\s*?#, empty(?!\n)\s*?(?=(?:$|\n)))'
 R_MSGID = r'(?:(?:^|\n)(?!\n)\s*?msgid(?!\n)\s+' + R_STR + r'(?!\n)\s*?(?=(?:$|\n)))'
 R_MSGSTR = r'(?:(?:^|\n)(?!\n)\s*?msgstr(?!\n)\s+' + R_STR + r'(?!\n)\s*?(?=(?:$|\n)))'
 
@@ -118,6 +119,7 @@ def parse_pot(content: str, allow_empty: bool = True) -> PotStrings:
 
     msgid = None
     msgstr = None
+    empty_comment = False
     message_block_offset = 0
     for ln, ls in enumerate(line_starts):
         # The function str.find() returns -1 if it fails to find. Pretty handy.
@@ -143,12 +145,13 @@ def parse_pot(content: str, allow_empty: bool = True) -> PotStrings:
             print('Fatal error: bad PO/POT file: message is translated twice: msgid = \'' + msgid + '\'',file=sys.stderr)
             sys.exit(1)
         msgstr = m.groups()[0]
-        if not allow_empty and msgstr == '':
-            print('Fatal error: bad PO/POT file: msgstr is empty: msgid = \'' + msgid + '\'',file=sys.sterr)
+        if not allow_empty and msgstr == '' and not empty_comment:
+            print('Fatal error: bad PO/POT file: msgstr is empty: msgid = \'' + msgid + '\'',file=sys.stderr)
             sys.exit(1)
 
         result.add(PotString(msgid, msgstr, [message_block_offset, le + 1]))
         msgstr = None
+        empty_comment = False
         message_block_offset = le + 1
     return result
 
