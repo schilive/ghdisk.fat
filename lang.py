@@ -10,10 +10,9 @@ R_CSTRS = r'\b' + G_KEYWORD + r'\b\s*(?:\(+)\s*'\
     + R_STRS + r'\s*(?:\)+)\s*(?=[,)])'                     # " " " " " as the 1st parm in the func keyword
 
 
-R_MSGID = r'(?:(?:^|\n)(?!\n)\s*msgid\s*' + R_STR + r')'    # Captures the string content
-R_MSGSTR = r'(?:(?:^|\n)(?!\n)\s*msgstr\s*' + R_STR + r')'  # Captures the string content
-R_MSG = r'(?:' + R_MSGID + r'\s*?\n*\s*' + R_MSGSTR + r')'  # " " " " of msgid and msgstr
-R_MSGLN = r'(?:' + R_MSG + r'\s*(?!(?:(?!\n)\s)*.))'        # Contains R_MSG
+# The following regexes contain a string
+R_MSGID = r'(?:(?:^|\n)(?!\n)\s*?msgid(?!\n)\s+' + R_STR + r'(?!\n)\s*?(?=(?:$|\n)))'
+R_MSGSTR = r'(?:(?:^|\n)(?!\n)\s*?msgstr(?!\n)\s+' + R_STR + r'(?!\n)\s*?(?=(?:$|\n)))'
 
 
 class CString:
@@ -108,19 +107,49 @@ def parse_c_file(content):
 def parse_pot(content: str, allow_empty: bool = True) -> PotStrings:
     assert(type(content) == str)
 
+    line_feeds = [m.start() for m in re.finditer(r'\n', content)]
+    line_starts = []
+    if len(content) != 0:
+        line_starts.append(0)
+    for lf in line_feeds:
+        line_starts.append(lf + 1)
+
     result = PotStrings()
-    for m in re.finditer(R_MSGLN, content):
-        msgid = m.groups()[0]
-        msgstr = m.groups()[1]
-        location = [m.start(), m.end()]
-        #print(f'MSG = ({msgid}, {msgstr}, {location})')
+
+    msgid = None
+    msgstr = None
+    message_block_offset = 0
+    for ln, ls in enumerate(line_starts):
+        # The function str.find() returns -1 if it fails to find. Pretty handy.
+        le = content.find('\n', ls)
+        l = content[ls:le]
+
+        if re.match(r'^\s*?$', l) is not None:
+            continue
+        
+        m = re.match(R_MSGID, l)
+        if m is not None:
+            msgid = m.groups()[0]
+            continue
+
+        m = re.match(R_MSGSTR, l)
+        if m is None:
+            print('Fatal error: bad PO/POT file: unknown command in line \'' + str(ln) + '\'',file=sys.stderr)
+            sys.exit(1)
+        if msgid is None:
+            print('Fatal error: bad PO/POT file: command \'msgstr\' is not used after a \'msgid\'',file=sys.stderr)
+            sys.exit(1)
         if msgid in result.dict:
-            print('Fatal error: PO file has 2 or more translations of the same message: \'' + msgid + '\'', file=sys.stderr)
+            print('Fatal error: bad PO/POT file: message is translated twice: msgid = \'' + msgid + '\'',file=sys.stderr)
             sys.exit(1)
-        if not allow_empty and len(msgstr) == 0:
-            print('Fatal error: Translation message is empty: msgid = \'' + msgid + '\'')
+        msgstr = m.groups()[0]
+        if not allow_empty and msgstr == '':
+            print('Fatal error: bad PO/POT file: msgstr is empty: msgid = \'' + msgid + '\'',file=sys.sterr)
             sys.exit(1)
-        result.add(PotString(msgid, msgstr, location))
+
+        result.add(PotString(msgid, msgstr, [message_block_offset, le + 1]))
+        msgstr = None
+        message_block_offset = le + 1
     return result
 
 
@@ -134,17 +163,6 @@ def generate_pot(msgids):
         r += 'msgstr ""\n'
         r += '\n'
     return r
-
-
-def open_read_validate_pot(filepath: str):
-    assert(type(filepath) == str)
-    f = open(filepath)
-    content = f.read()
-    f.close()
-
-    if re.match('^' + R_MSGLN + '*$', content) is None:
-        print('Fatal error: PO file has invalid syntax: \'' + filepath + '\'', file=sys.stderr)
-    return content
 
 
 def cmd_make_pot(c_filepath, pot_filepath):
@@ -167,7 +185,9 @@ def cmd_replace_c_file(pot_filepath, c_filepath):
     assert(type(c_filepath) == str)
     assert(type(pot_filepath) == str)
 
-    pot_content = open_read_validate_pot(pot_filepath)
+    pot_file = open(pot_filepath, 'rt')
+    pot_content = pot_file.read()
+    pot_file.close()
 
     pot_ps = parse_pot(pot_content, allow_empty=False)
     del pot_content
@@ -207,7 +227,10 @@ def cmd_update_pot(c_filepath, pot_filepath, dry = False):
     c_cs = parse_c_file(c_content)
     del c_content
 
-    pot_content = open_read_validate_pot(pot_filepath)
+    pot_file = open(pot_filepath, 'rt')
+    pot_content = pot_file.read()
+    pot_file.close()
+
     pot_ps = parse_pot(pot_content)
 
     for string in c_cs.strings:
@@ -247,8 +270,13 @@ def cmd_update_po(pot_filepath, po_filepath, dry = False):
     assert(type(po_filepath) == str)
     changed = False
 
-    pot_content = open_read_validate_pot(pot_filepath)
-    po_content = open_read_validate_pot(po_filepath)
+    pot_file = open(pot_filepath, 'rt')
+    po_file = open(po_filepath, 'rt')
+    pot_content = pot_file.read()
+    po_content = po_file.read()
+    pot_file.close()
+    po_file.close()
+
     pot_ps = parse_pot(pot_content)
     po_ps = parse_pot(po_content, allow_empty = not dry)
     del pot_content
