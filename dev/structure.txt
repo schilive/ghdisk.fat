@@ -1,0 +1,58 @@
+# Structure of the Project
+The documentation does not describe the file structure created by
+'GNUmakefile'. This is because 'GNUmakefile' should be easy _enough_ to
+understand after reading all developer documentation.
+
+## File Structure
+- 'src/': source code.
+- 'po/': translations and template (POT).
+- 'dev/': developer-oriented documentation.
+
+## Translation System
+If the project is built without translation (i.e. M_LANG is unset), then '_'
+is a function defined in 'lang.h', which simply returns its argument. If the
+project is built with translation, then '_' is just a keyword for 'lang.py' to
+identify all occurrences, to identify all translatable strings.
+
+The script 'lang.py' is a command-line tool with subcoomands, based on GNU
+'xgettext' toolchain. Using simply 'lang.py' prints the help message. It can
+create a template from one C file, update the template from one C file, update
+the language-specific translation file from the template, and most importantly
+it can replace all text occurrences of '_(STR)' to the translation of 'STR' in
+the language-specific translation file.
+
+The script 'lang.py' is ad-hoc and specific to this project, so it may be
+changed at any time to fit the project's needs, and for improvements. Also, it
+has little error handling, so Python exceptions are mostly used for error
+logging.
+
+### Flow
+Each C source file (e.g. 'a.c') has one template file, stored in 'po/' (e.g.
+'po/a.pot), with empty translation strings; this file is created by command
+'lang.py make_pot'. A language-specific translation file is created by simply
+copying the template to the language-specific directory, whose name is the
+translation code (e.g. po/pt/a.po).
+
+So the template has not to be remade, the command 'lang.py update_pot' is
+available. Similarly, so the translation file has not to be remade, the
+command 'lang.py update_po' is available. Both exclude unused messages and
+adds new messages with empty translations.
+
+Finally, to build the C source code with translation, all occurrences of
+'_(STR)' are replaced with the translation, with the command 'lang.py
+replace_c_file'.
+
+### Format
+The format of template and translation files, is the same. It is based on GNU
+'xgettext' '.po'/'.pot' files. It is a series of "messages", and lines empty
+or made of only space characters are skipped. A message has the following
+format.
+
+[#, empty]
+msgid "_(STR)"
+msgstr "Translation"
+
+The string after 'msgid' is the argument of 'msgid', and similarly for
+'msgstr'. The argument of 'msgid' is the string to be translated, written in
+'_(STR)'. The argument of 'msgstr' is the translation, which cannot be empty
+unless "#, empty" is given.

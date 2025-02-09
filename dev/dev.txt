@@ -1,0 +1,37 @@
+# Things to Know Before Developing
+## Before Committing
+Absolutely always check if the POT file is up-to-date.
+
+## Header Comments
+Always write a licence header comment and another, below, at least explaining
+the function of that file.
+
+## Documenting
+There is a hierarchy of documentation forms, where the lower item assumes
+knowledge of the higher item.
+        - 'dev/structure.txt': explains the project from a high-level view.
+        - File-specific header comment. If the file is evidently an
+          implementation of another header file, the header file's header
+          comment is also assumed.
+        - File-, structure- or macro-specific interface comment.
+        - File-, structure- or macro-specific implementation comment.
+
+Every function, structure and macro should have a comment describing its
+interface for use, even if it is obvious, like 'int abs(int x)'.
+
+## Keeping the Project Translatable
+When using a translatable string, use '_("STR")' or '_("S1" "S2" ..)'. Do not
+use '(_)' or another indirect form. Do not use '_(STR)' or another indirect
+form. Otherwise, the translation may not work.
+
+When writing output-able strings, including translatable strings, do the
+following.
+        - Do not use escape characters in the string, unless there is no
+          alternative.
+        - Do not use format specifiers in translatable strings, preferring
+        the following style: "Error: could not open file: '%file': '%error",
+        where only "Error" (and not "Error:") and "could not open file" should
+        be translatable strings.
+        - Only use US-ASCII characters.
+        - Write entire sentences, unless it is more appropriately done
+          otherwise, as in the text "Usage" in help messages.
