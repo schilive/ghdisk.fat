@@ -35,10 +35,16 @@ Each C source file (e.g. 'a.c') has one template file, stored in 'po/' (e.g.
 copying the template to the language-specific directory, whose name is the
 translation code (e.g. po/pt/a.po).
 
-So the template has not to be remade, the command 'lang.py update_pot' is
-available. Similarly, so the translation file has not to be remade, the
-command 'lang.py update_po' is available. Both exclude unused messages and
-adds new messages with empty translations.
+So the template and the translation file have not to be remade, the commands
+'lang.py update_pot' and 'lang.py update_po' are available; both exclude
+unused messages and add new messages with empty translations. For verifying
+the template and the translation file are up-to-date, the above commands
+support the dry option '-n'; if up-to-date, the exit code is non-zero,
+otherwise 0.
+
+Similarly, so the translation file has not
+to be remade, the command 'lang.py update_po' is available. Both exclude
+unused messages and adds new messages with empty translations.
 
 Finally, to build the C source code with translation, all occurrences of
 '_(STR)' are replaced with the translation, with the command 'lang.py
