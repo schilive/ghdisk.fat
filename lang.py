@@ -323,8 +323,8 @@ def main():
         print('Commands:')
         print('\tmake_pot <c_file> <pot_file>')
         print('\treplace_c_file <pot_file> <c_file>')
-        print('\tupdate_pot <c_file> <pot_file>')
-        print('\tupdate_po <pot_file> <po_file>')
+        print('\tupdate_pot <c_file> <pot_file> [-n]')
+        print('\tupdate_po <pot_file> <po_file> [-n]')
         print('')
         sys.exit(0)
     command = sys.argv[1]
