@@ -137,6 +137,9 @@ ifeq ($(M_COMPILER_MSVC),0)
     ifneq ($(M_OPTIMISE),0)
         M_CFLAGS += -O3
     endif
+    ifneq ($(origin M_LANG),undefined)
+        M_CFLAGS += -D_GLOBAL_NOLANGH
+    endif
 else
     V_O := .o
     M_CC ?= CL
@@ -149,6 +152,9 @@ else
     endif
     ifneq ($(M_OPTIMISE),0)
         M_CFLAGS += /O2
+    endif
+    ifneq ($(origin M_LANG),undefined)
+        M_CFLAGS += /D _GLOBAL_NOLANGH
     endif
 endif
 

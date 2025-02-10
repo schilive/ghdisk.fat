@@ -27,9 +27,11 @@ SOFTWARE.
 #ifndef LANG_H
 #define LANG_H
 
+#ifndef _GLOBAL_NOLANGH
 const char *_(const char *s)
 {
         return s;
 }
+#endif
 
 #endif /* LANG_H */

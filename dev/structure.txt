@@ -11,8 +11,10 @@ understand after reading all developer documentation.
 ## Translation System
 If the project is built without translation (i.e. M_LANG is unset), then '_'
 is a function defined in 'lang.h', which simply returns its argument. If the
-project is built with translation, then '_' is just a keyword for 'lang.py' to
-identify all occurrences, to identify all translatable strings.
+project is built with translation, then the macro '_GLOBAL_NOLANGH' is
+defined globally, which makes 'lang.h' not define '_()'. Then, '_' is just a
+keyword for 'lang.py' to identify all occurrences, to identify all
+translatable strings.
 
 The script 'lang.py' is a command-line tool with subcoomands, based on GNU
 'xgettext' toolchain. Using simply 'lang.py' prints the help message. It can
