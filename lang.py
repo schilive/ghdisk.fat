@@ -208,7 +208,7 @@ def cmd_replace_c_file(pot_filepath, c_filepath, original_c_filepath=None):
         for msgid in original_c_cs.strings:
             if len(original_c_cs.strings[msgid]) != len(c_cs.strings[msgid]):
                 print('Fatal error: original C file and C file have different number of occurences of the same message:'
-                      + ' msgid = \'' + msgid + '\'', file=sys.stderr)
+                      + ' -->msgid = \'' + msgid + '\'', file=sys.stderr)
                 sys.exit(1)
 
     pot_file = open(pot_filepath, 'rt')
@@ -335,7 +335,7 @@ def usage():
     print('Commands:')
     print('\t--help, -h')
     print('\tmake_pot <c_file> <pot_file>')
-    print('\treplace_c_file <pot_file> <c_file> [original_c_file]')
+    print('\treplace_c_file <po_file> <c_file> [original_c_file]')
     print('\tupdate_pot <c_file> <pot_file> [-n]')
     print('\tupdate_po <pot_file> <po_file> [-n]')
     print('')
