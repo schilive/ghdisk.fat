@@ -135,6 +135,7 @@ C_PO_DIR := po
 ###
 
 M_DEBUG ?= 0
+M_OPTIMISE ?= 0
 
 M_COMPILER_MSVC ?= 0
 ifeq ($(M_COMPILER_MSVC),0)
@@ -144,6 +145,9 @@ ifeq ($(M_COMPILER_MSVC),0)
     ifneq ($(M_DEBUG),0)
         M_CFLAGS += -g
     endif
+    ifneq ($(M_OPTIMISE),0)
+        M_CFLAGS += -O3
+    endif
 else
     V_O := .o
     M_CC ?= CL
@@ -152,7 +156,10 @@ else
     M_LFLAGS=
     ifneq ($(M_DEBUG),0)
         M_CFLAGS += /DEBUG
-	M_LFLAGS += /DEBUG
+        M_LFLAGS += /DEBUG
+    endif
+    ifneq ($(M_OPTIMISE),0)
+        M_CFLAGS += /O2
     endif
 endif
 

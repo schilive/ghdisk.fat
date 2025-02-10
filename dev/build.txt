@@ -58,6 +58,9 @@ an environmental variable.
 - 'M_ALFLAGS': like 'M_LFLAGS', but never modified internally, and added after.
 
 - 'M_DEBUG = 0': if set, the debug flag is added to 'M_CFLAGS' and 'M_LFLAGS'.
+- 'M_OPTIMISE = 0': if set, the optimisation flag of most aggressive
+  optmisation, except those that may change behaviour, are added to 'M_CFLAGS'
+  and 'M_LFLAGS'.
 
 ### Translation Options
 - 'M_LANG': if set, the translation identifier code. It uses the translation
