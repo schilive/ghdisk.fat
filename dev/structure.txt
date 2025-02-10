@@ -42,9 +42,9 @@ the template and the translation file are up-to-date, the above commands
 support the dry option '-n'; if up-to-date, the exit code is non-zero,
 otherwise 0.
 
-Similarly, so the translation file has not
-to be remade, the command 'lang.py update_po' is available. Both exclude
-unused messages and adds new messages with empty translations.
+Similarly, so the translation file has not to be remade, the command 'lang.py
+update_po' is available. Both exclude unused messages and adds new messages
+with empty translations.
 
 Finally, to build the C source code with translation, all occurrences of
 '_(STR)' are replaced with the translation, with the command 'lang.py
