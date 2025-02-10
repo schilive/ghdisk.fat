@@ -46,9 +46,11 @@ endif
 
 ifeq ($(M_HOST_OS),WIN32)
     V_E := .exe
+    M_PYTHON ?= python
 else
 ifeq ($(M_HOST_OS),NIX)
     V_E := 
+    M_PYTHON ?= python3
 else
     V_BADOS := 1
 endif
@@ -105,19 +107,6 @@ ifeq ($(M_HOST_OS),WIN32)
 else
     define fn_copy
         cp -rf $(1) $(2)
-    endef
-endif
-
-# Executes Python with arguments. It seems that on UNIX, the python binary is
-# "python3", and on Windows, "python".
-# Usage: <arguments>
-ifeq ($(M_HOST_OS),WIN32)
-    define fn_python
-        python $(1)
-    endef
-else
-    define fn_python
-        python3 $(1)
     endef
 endif
 
@@ -228,16 +217,16 @@ $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_O): $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.c
 
 $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.c: $(M_BUILD_DIR)/ghdisk.fat.c $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po | build_dir pot_uptodate_ghdisk.fat.c po_uptodate_ghdisk.fat.c_$(M_LANG)
 	$(call fn_copy,$(word 1,$^),$@)
-	$(call fn_python,lang.py replace_c_file $(word 2,$^) $@)
+	$(M_PYTHON) lang.py replace_c_file $(word 2,$^) $@
 
 $(M_BUILD_DIR)/ghdisk.fat.c: $(C_SRC_DIR)/ghdisk.fat.c $(C_SRC_DIR)/lang.h | build_dir
 	$(call fn_cc_i,$(word 1,$^),$@)
 
 pot_uptodate_ghdisk.fat.c:
-	$(call fn_python,lang.py update_pot $(C_SRC_DIR)/ghdisk.fat.c $(C_PO_DIR)/ghdisk.fat.pot -n)
+	$(M_PYTHON) lang.py update_pot $(C_SRC_DIR)/ghdisk.fat.c $(C_PO_DIR)/ghdisk.fat.pot -n
 
 po_uptodate_ghdisk.fat.c_$(M_LANG):
-	$(call fn_python,lang.py update_po $(C_PO_DIR)/ghdisk.fat.pot $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po -n)
+	$(M_PYTHON) lang.py update_po $(C_PO_DIR)/ghdisk.fat.pot $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po -n
 
 endif
 

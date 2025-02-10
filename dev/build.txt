@@ -40,8 +40,8 @@ an environmental variable.
   through whether the environmental variable 'OS' value is 'Windows_NT', else
   whether issuing the command 'uname' returns exit code 0, else an error is
   raised. Its choice determines the tools used (e.g. 'rm' or 'DEL'), the file
-  extensions used (e.g. ".o" or ".obj"), and the Python binary name ('python3'
-  or 'python').
+  extensions used (e.g. ".o" or ".obj"), and the default Python binary name
+  ('python3' or 'python').
 
 ### Compiler Toolchain Options
 - 'M_COMPILER_MSVC = 0': if set, it uses the compiler toolchain
@@ -61,6 +61,8 @@ an environmental variable.
 - 'M_OPTIMISE = 0': if set, the optimisation flag of most aggressive
   optmisation, except those that may change behaviour, are added to 'M_CFLAGS'
   and 'M_LFLAGS'.
+
+- 'M_PYTHON = python3 | python': the Python interpreter used.
 
 ### Translation Options
 - 'M_LANG': if set, the translation identifier code. It uses the translation
