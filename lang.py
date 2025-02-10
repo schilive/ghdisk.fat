@@ -317,18 +317,27 @@ def cmd_update_po(pot_filepath, po_filepath, dry = False):
         po_file.close()
 
 
+def usage():
+    print('Usage: <command> [<args...>]')
+    print('Commands:')
+    print('\t--help, -h')
+    print('\tmake_pot <c_file> <pot_file>')
+    print('\treplace_c_file <pot_file> <c_file>')
+    print('\tupdate_pot <c_file> <pot_file> [-n]')
+    print('\tupdate_po <pot_file> <po_file> [-n]')
+    print('')
+
+
 def main():
     if len(sys.argv) <= 1:
-        print('Usage: <command> [<args...>]')
-        print('Commands:')
-        print('\tmake_pot <c_file> <pot_file>')
-        print('\treplace_c_file <pot_file> <c_file>')
-        print('\tupdate_pot <c_file> <pot_file> [-n]')
-        print('\tupdate_po <pot_file> <po_file> [-n]')
-        print('')
+        usage()
         sys.exit(0)
     command = sys.argv[1]
     command_argv = sys.argv[2:]
+    if command in {'-h', '--help'}:
+        usage()
+        sys.exit(0)
+
     dry = False
     if len(command_argv) < 2:
         print('Fatal error: required arguments not given', file=sys.stderr)

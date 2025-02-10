@@ -17,7 +17,7 @@ keyword for 'lang.py' to identify all occurrences, to identify all
 translatable strings.
 
 The script 'lang.py' is a command-line tool with subcoomands, based on GNU
-'xgettext' toolchain. Using simply 'lang.py' prints the help message. It can
+'xgettext' toolchain. Use 'lang.py --help' to see the help message. It can
 create a template from one C file, update the template from one C file, update
 the language-specific translation file from the template, and most importantly
 it can replace all text occurrences of '_(STR)' to the translation of 'STR' in
