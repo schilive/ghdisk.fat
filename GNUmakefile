@@ -166,11 +166,11 @@ endif
 # Usage: <input>, <output>
 ifeq ($(M_COMPILER_MSVC),0)
     define fn_cc_obj
-        $(M_CC) $(M_CFLAGS) -c -o $(2) $(1)
+        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) -c -o $(2) $(1)
     endef
 else
     define fn_cc_obj
-        $(M_CC) $(M_CFLAGS) /c /Fo:$(2) $(1)
+        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) /c /Fo:$(2) $(1)
     endef
 endif
 
@@ -180,11 +180,11 @@ endif
 # Usage: <input> ..., <output>
 ifeq ($(M_COMPILER_MSVC),0)
     define fn_ld_exe
-        $(M_CC) $(M_CFLAGS) -o $(2) $(1)
+        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) -o $(2) $(1)
     endef
 else
     define fn_ld_exe
-        $(M_LD) $(M_LFLAGS) /OUT:$(2) $(1)
+        $(M_LD) $(M_LFLAGS) $(M_ALFLAGS) /OUT:$(2) $(1)
     endef
 endif
 
@@ -192,11 +192,11 @@ endif
 # Usage: <input> <output>
 ifeq ($(M_COMPILER_MSVC),0)
     define fn_cc_i
-        $(M_CC) $(M_CFLAGS) -E -o $(2) $(1)
+        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) -E -o $(2) $(1)
     endef
 else
     define fn_cc_i
-        $(M_CC) $(M_CFLAGS) /P /Fi:$(2) $(1)
+        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) /P /Fi:$(2) $(1)
     endef
 endif
 

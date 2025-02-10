@@ -51,8 +51,11 @@ an environmental variable.
 - 'M_CFLAGS = -Wall -Wextra -pedantic -std=c89 | /Wall': the C compiler flags
   added to every use of 'M_CC'. If 'M_COMPILER_MSVC = 0', then the first list
   of flags is default, otherwise the second.
+- 'M_ACFLAGS': like 'M_CFLAGS', but never modified internally, and added
+  after.
 - 'M_LD = LINK': if 'M_COMPILER_MSVC' is set, then 'M_LD' is the linker.
 - 'M_LFLAGS': the linker flags added to every use of 'M_LD'.
+- 'M_ALFLAGS': like 'M_LFLAGS', but never modified internally, and added after.
 
 - 'M_DEBUG = 0': if set, the debug flag is added to 'M_CFLAGS' and 'M_LFLAGS'.
 
