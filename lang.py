@@ -9,7 +9,6 @@ R_STRS = r'((?:' + R_STR + r'\s*)+)'                        # " the series of st
 R_CSTRS = r'\b' + G_KEYWORD + r'\b\s*(?:\(+)\s*'\
     + R_STRS + r'\s*(?:\)+)\s*(?=[,)])'                     # " " " " " as the 1st parm in the func keyword
 
-
 # The following regexes contain a string
 R_MTCMT = r'(?:(?:^|\n)(?!\n)\s*?#, empty(?!\n)\s*?(?=(?:$|\n)))'
 R_MSGID = r'(?:(?:^|\n)(?!\n)\s*?msgid(?!\n)\s+' + R_STR + r'(?!\n)\s*?(?=(?:$|\n)))'
@@ -188,23 +187,37 @@ def cmd_make_pot(c_filepath, pot_filepath):
     pot_file.close()
 
 
-def cmd_replace_c_file(pot_filepath, c_filepath):
+def cmd_replace_c_file(pot_filepath, c_filepath, original_c_filepath=None):
     assert(type(c_filepath) == str)
     assert(type(pot_filepath) == str)
-
-    pot_file = open(pot_filepath, 'rt')
-    pot_content = pot_file.read()
-    pot_file.close()
-
-    pot_ps = parse_pot(pot_content, allow_empty=False)
-    del pot_content
-    #print(pot_ps.__dict__)
 
     c_file = open(c_filepath, 'rt')
     c_content = c_file.read()
     c_file.close()
-
     c_cs = parse_c_file(c_content)
+
+    if original_c_filepath is not None:
+        original_c_file = open(original_c_filepath, 'rt')
+        original_c_content = original_c_file.read()
+        original_c_file.close()
+        original_c_cs = parse_c_file(original_c_content)
+
+        if set(original_c_cs.strings.keys()) != set(c_cs.strings.keys()):
+            print('Fatal error: original C file and C file have different translatable strings',file=sys.stderr)
+            sys.exit(1)
+        for msgid in original_c_cs.strings:
+            if len(original_c_cs.strings[msgid]) != len(c_cs.strings[msgid]):
+                print('Fatal error: original C file and C file have different number of occurences of the same message:'
+                      + ' msgid = \'' + msgid + '\'', file=sys.stderr)
+                sys.exit(1)
+
+    pot_file = open(pot_filepath, 'rt')
+    pot_content = pot_file.read()
+    pot_file.close()
+    pot_ps = parse_pot(pot_content, allow_empty=False)
+    del pot_content
+    #print(pot_ps.__dict__)
+
     # We need to sort otherwise the location may become incorrect.
     #
     # For example, if we have the file 'ab cd' and the locations [[0, 1], [3, 4]], then if we first substitute the first
@@ -322,13 +335,16 @@ def usage():
     print('Commands:')
     print('\t--help, -h')
     print('\tmake_pot <c_file> <pot_file>')
-    print('\treplace_c_file <pot_file> <c_file>')
+    print('\treplace_c_file <pot_file> <c_file> [original_c_file]')
     print('\tupdate_pot <c_file> <pot_file> [-n]')
     print('\tupdate_po <pot_file> <po_file> [-n]')
     print('')
 
 
 def main():
+    def error_too_many_arguments():
+        print('Fatal error: too many argument given', file=sys.stderr)
+
     if len(sys.argv) <= 1:
         usage()
         sys.exit(0)
@@ -342,15 +358,23 @@ def main():
     if len(command_argv) < 2:
         print('Fatal error: required arguments not given', file=sys.stderr)
         sys.exit(1)
-    elif (len(command_argv) > 2 and command not in ['update_pot', 'update_po']) or len(command_argv) > 3:
-        print('Fatal error: too many argument given', file=sys.stderr)
-        sys.exit(1)
-    elif command in ['update_pot', 'update_po'] and len(command_argv) >= 3:
-        n = command_argv[2]
-        if n != '-n':
-            print('Fatal error: unknown option: \'' + n + '\'')
+    if command in ['update_pot', 'update_po']:
+        if len(command_argv) > 3:
+            error_too_many_arguments()
             sys.exit(1)
-        dry = True
+        if len(command_argv) == 3:
+            if command_argv[-1] == '-n':
+                dry = True
+            else:
+                print('Fatal error: unknown option: \'' + n + '\'', file=sys.stderr)
+                sys.exit(1)
+    elif command == 'replace_c_file':
+        if len(command_argv) > 3:
+            error_too_many_arguments()
+            sys.exit(1)
+    elif len(command_argv) > 2:
+        error_too_many_arguments()
+        sys.exit(1)
 
     if command == 'make_pot':
         c_file = command_argv[0]
@@ -359,7 +383,8 @@ def main():
     elif command == 'replace_c_file':
         pot_file = command_argv[0]
         c_file = command_argv[1]
-        cmd_replace_c_file(pot_file, c_file)
+        original_c_file = None if len(command_argv) <= 2 else command_argv[2]
+        cmd_replace_c_file(pot_file, c_file, original_c_file)
     elif command == 'update_pot':
         c_file = command_argv[0]
         pot_file = command_argv[1]

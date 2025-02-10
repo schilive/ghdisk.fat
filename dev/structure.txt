@@ -48,7 +48,10 @@ unused messages and adds new messages with empty translations.
 
 Finally, to build the C source code with translation, all occurrences of
 '_(STR)' are replaced with the translation, with the command 'lang.py
-replace_c_file'.
+replace_c_file'. For greater safety, another C source file is provided that
+should match the target C file in both the messages it uses and the number of
+uses of each used message. This is useful since the target C file is not the
+same as the C source from where the template and translation were generated.
 
 ### Format
 The format of template and translation files, is the same. It is based on GNU

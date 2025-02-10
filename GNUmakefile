@@ -221,9 +221,9 @@ $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_E): $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(
 $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_O): $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.c | build_dir
 	$(call fn_cc_obj,$(word 1,$^),$@)
 
-$(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.c: $(M_BUILD_DIR)/ghdisk.fat.c $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po | build_dir pot_uptodate_ghdisk.fat.c po_uptodate_ghdisk.fat.c_$(M_LANG)
+$(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.c: $(M_BUILD_DIR)/ghdisk.fat.c $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po $(C_SRC_DIR)/ghdisk.fat.c | build_dir pot_uptodate_ghdisk.fat.c po_uptodate_ghdisk.fat.c_$(M_LANG)
 	$(call fn_copy,$(word 1,$^),$@)
-	$(M_PYTHON) lang.py replace_c_file $(word 2,$^) $@
+	$(M_PYTHON) lang.py replace_c_file $(word 2,$^) $@ $(word 3,$^)
 
 $(M_BUILD_DIR)/ghdisk.fat.c: $(C_SRC_DIR)/ghdisk.fat.c $(C_SRC_DIR)/lang.h | build_dir
 	$(call fn_cc_i,$(word 1,$^),$@)
