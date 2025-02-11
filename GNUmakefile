@@ -211,6 +211,8 @@ build: $(M_BUILD_DIR)/$(M_TARGET)$(V_E)
 clean:
 	$(call fn_rmdir,$(M_BUILD_DIR))
 
+re: clean build
+
 .PHONY: build clean
 
 ###
