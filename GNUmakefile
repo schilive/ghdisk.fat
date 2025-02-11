@@ -172,7 +172,7 @@ ifeq ($(M_COMPILER_MSVC),0)
     endef
 else
     define fn_cc_obj
-        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) /c /Fo:$(2) $(1)
+        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) /TC /c /Fo:$(2) $(1)
     endef
 endif
 
@@ -218,10 +218,10 @@ else
 $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_E): $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_O) | build_dir
 	$(call fn_ld_exe,$(word 1,$^),$@)
 
-$(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_O): $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.c | build_dir
+$(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat$(V_O): $(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.i | build_dir
 	$(call fn_cc_obj,$(word 1,$^),$@)
 
-$(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.c: $(M_BUILD_DIR)/ghdisk.fat.c $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po $(C_SRC_DIR)/ghdisk.fat.c | build_dir pot_uptodate_ghdisk.fat.c po_uptodate_ghdisk.fat.c_$(M_LANG)
+$(M_BUILD_DIR)/$(M_LANG)/ghdisk.fat.i: $(M_BUILD_DIR)/ghdisk.fat.c $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po $(C_SRC_DIR)/ghdisk.fat.c | build_dir pot_uptodate_ghdisk.fat.c po_uptodate_ghdisk.fat.c_$(M_LANG)
 	$(call fn_copy,$(word 1,$^),$@)
 	$(M_PYTHON) lang.py replace_c_file $(word 2,$^) $@ $(word 3,$^)
 
