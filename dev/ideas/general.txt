@@ -11,6 +11,7 @@ it can be restored.
 5. Any code in the bootloader.
 6. Options "--msdos-volume", to select raw volume, and "--msdos-device", to
 select raw device, as a possible substitute of "-f" on MS-DOS/MS-WIN.
+7. Kanji support. Somethings were different when Kanji was supported.
 
 # Kinda Looney
 1. A "script"-like file interpreted by the program to do the actions proposed.
