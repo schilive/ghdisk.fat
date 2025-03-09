@@ -27,23 +27,24 @@ SOFTWARE.
 #include <stdio.h>
 #include <string.h>
 #include "lang.h"
+#include "sys.h"
 
 static void usage(void)
 {
-        printf(
-                "%s: [ops...] <%s> <%s...>\n"
-                "\n"
-                "%s:\n"
-                "        --help, -h      %s.\n"
-                "        --version, -v   %s.\n",
+        sys_prnout_ssssss(
+                "%a: [ops...] <%b> <%c...>\n"
+                "%d:\n"
+                "        --help, -h      %e.\n"
+                "        --version, -v   %f.\n",
                 _("Usage"), _("Command"), _("Command args"), _("Commands"),
                 _("Displays help message"), _("Displays version")
+                
         );
 }
 
 static void version(void)
 {
-        printf("Version 0.0.0\n");
+        sys_prnout("Version 0.0.0\n");
 }
 
 int main(int argc, char *argv[])
@@ -57,7 +58,7 @@ int main(int argc, char *argv[])
         }
 
         for (i = 1; argv[i] != NULL; i++) {
-                const char *arg = argv[i];
+                char *arg = argv[i];
                 int opt_long = 0;
                 if (arg[0] != '-' || arg[1] == 0) {
                         cmd = i;
@@ -93,13 +94,12 @@ int main(int argc, char *argv[])
                 if (h || v)
                         break;
 
-                (void)fprintf(stderr, "%s: %s: '",
-                        _("Fatal error"), _("unknown option given"));
+                sys_prnerr_ss("%a: %b: '", _("Fatal error"), _("unknown option given"));
                 if (opt_long)
-                        (void)fprintf(stderr, "%s", arg);
+                        sys_prnerr_s("%a", arg);
                 else
-                        (void)fprintf(stderr, "-%c", arg[1]);
-                (void)fprintf(stderr, "'\n");
+                        sys_prnerr_c("-%a", arg[1]);
+                sys_prnerr("'\n");
                 return 1;
         }
 
@@ -114,14 +114,12 @@ int main(int argc, char *argv[])
 
         if (cmd == -1)
                 goto error_no_command;
-        (void)fprintf(stderr,
-                        "%s: %s: '%s'\n", 
-                        _("Fatal error"), _("unknown command given"), argv[i]
-                     );
+        sys_prnerr_sss("%a: %b: '%c'\n", 
+                _("Fatal error"), _("unknown command given"), argv[1]);
         return 1;
 
 error_no_command:
-        (void)fprintf(stderr, "%s: %s\n",
+        sys_prnerr_ss("%a: %b\n",
                 _("Fatal error"), _("no command given"));
         return 1;
 }

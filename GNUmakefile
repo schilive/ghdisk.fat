@@ -216,49 +216,49 @@ re: clean build
 .PHONY: build clean
 
 ###
-### 2.1. No Translation
+### 2.1. Target Definitions
 ###
 
-ifeq ($(origin M_LANG),undefined)
-$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) | build_dir
-	$(call fn_ld_exe,$(word 1,$^),$@)
+# Builds '$(C_SRC_DIR)/$1.c' to '$(M_BUILD_DIR)/$1$(V_O)'.
+# Usage: <source c filename>, <translatable>, [<prerequisite headers>]
+define fn_bld_c_obj
+ifeq ($$(if $2,$$(M_LANG),),)
 
-$(M_BUILD_DIR)/ghdisk.fat$(V_O): $(C_SRC_DIR)/ghdisk.fat.c $(C_SRC_DIR)/lang.h | build_dir
-	$(call fn_cc_obj,$(word 1,$^),$@)
+$$(M_BUILD_DIR)/$1$$(V_O): $$(C_SRC_DIR)/$1.c $3 | build_dir
+	$$(call fn_cc_obj,$$(word 1,$$^),$$@)
+
+else
+
+$$(M_BUILD_DIR)/$1$$(V_O): $$(M_BUILD_DIR)/$1.i | build_dir
+	$$(call fn_cc_obj,$$(word 1,$$^),$$@)
+
+$$(M_BUILD_DIR)/$1.i: $$(C_SRC_DIR)/$1.c $(C_PO_DIR)/$(M_LANG)/$1.po $3 | build_dir pot_uptodate/$1 po_uptodate/$1
+	$$(call fn_cc_i,$$(word 1,$$^),$$@)
+	$$(M_PYTHON) lang.py replace_c_file $$(word 2,$$^) $$@ $$(word 1,$$^)
+
+pot_uptodate/$1:
+	$(M_PYTHON) lang.py update_pot $(C_SRC_DIR)/$1.c $(C_PO_DIR)/$1.pot -n
+
+po_uptodate/$1:
+	$(M_PYTHON) lang.py update_po $(C_PO_DIR)/$1.pot $(C_PO_DIR)/$(M_LANG)/$1.po -n
+
+.PHONY: pot_uptodate/$1 po_uptodate/$1
+
 endif
+endef
 
 ###
-### 2.2. Translation
+### 2.2. Targets
 ###
 
-ifneq ($(origin M_LANG),undefined)
-$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) | build_dir
-	$(call fn_ld_exe,$(word 1,$^),$@)
+$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) $(M_BUILD_DIR)/sys$(V_O) | build_dir
+	$(call fn_ld_exe,$(word 1,$^) $(word 2,$^),$@)
 
-$(M_BUILD_DIR)/ghdisk.fat$(V_O): $(M_BUILD_DIR)/ghdisk.fat.i | build_dir
-	$(call fn_cc_obj,$(word 1,$^),$@)
-
-$(M_BUILD_DIR)/ghdisk.fat.i: $(M_BUILD_DIR)/ghdisk.fat.c $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po $(C_SRC_DIR)/ghdisk.fat.c | build_dir pot_uptodate/ghdisk.fat.c po_uptodate/ghdisk.fat.c
-	$(call fn_copy,$(word 1,$^),$@)
-	$(M_PYTHON) lang.py replace_c_file $(word 2,$^) $@ $(word 3,$^)
-
-$(M_BUILD_DIR)/ghdisk.fat.c: $(C_SRC_DIR)/ghdisk.fat.c $(C_SRC_DIR)/lang.h | build_dir
-	$(call fn_cc_i,$(word 1,$^),$@)
-
-pot_uptodate/ghdisk.fat.c:
-	$(M_PYTHON) lang.py update_pot $(C_SRC_DIR)/ghdisk.fat.c $(C_PO_DIR)/ghdisk.fat.pot -n
-
-po_uptodate/ghdisk.fat.c:
-	$(M_PYTHON) lang.py update_po $(C_PO_DIR)/ghdisk.fat.pot $(C_PO_DIR)/$(M_LANG)/ghdisk.fat.po -n
-
-.PHONY: pot_uptodate/ghdisk.fat.c po_uptodate/ghdisk.fat.c
-endif
-
-###
-### 2.3. Both
-###
+$(eval $(call fn_bld_c_obj,ghdisk.fat,1,$(C_SRC_DIR)/lang.h $(C_SRC_DIR)/sys.h))
+$(eval $(call fn_bld_c_obj,sys,,$(C_SRC_DIR)/sys.h))
 
 build_dir:
 	$(call fn_fmkdir,$(M_BUILD_DIR))
 
 .PHONY: build_dir
+

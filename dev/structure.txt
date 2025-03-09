@@ -8,6 +8,16 @@ understand after reading all developer documentation.
 - 'po/': translations and template (POT).
 - 'dev/': developer-oriented documentation.
 
+## OS-Agnostic I/O Interface
+The size of FAT volumes can easily exceed 4 GB, but the standard ISO C library
+uses the `long` type for file access, which is guaranteed to be at least
+32-bit. On MSVC and MinGW, it is usually 32-bit; on Linux, it may be either.
+Then, OS-specific I/O interfaces may be selected in the building process,
+beyond ISO C.
+
+- Windows 2000: Win32 API through C in a manner compatible with MinGW and MSVC.
+- POSIX: the POSIX C API, focusing mostly on glibc.
+
 ## Translation System
 If the project is built without translation (i.e. M_LANG is unset), then '_'
 is a function defined in 'lang.h', which simply returns its argument. If the

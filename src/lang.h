@@ -28,7 +28,7 @@ SOFTWARE.
 #define LANG_H
 
 #ifndef _GLOBAL_NOLANGH
-const char *_(const char *s)
+char *_(char *s)
 {
         return s;
 }
