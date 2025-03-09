@@ -22,7 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* This defines the interface in 'sys.h' using the ISO C standard library. */
+/* This implements the formatted print functions, using the OS-specific
+ * implementation of the print function.
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -59,16 +61,6 @@ static void sys_prn(enum sys_output out, char *cs, size_t n)
 static void sys_prns(enum sys_output out, char *cs)
 {
         sys_prn(out, cs, strlen(cs));
-}
-
-void sys_prnfout(char *fmt)
-{
-        sys_prns(SYS_OUT_STDOUT, fmt);
-}
-
-void sys_prnferr(char *fmt)
-{
-        sys_prns(SYS_OUT_STDERR, fmt);
 }
 
 static int get_lower_letter_position(char c)
@@ -134,6 +126,20 @@ static void print_format_string(
                 }
                 print_specifier(out, ss + alphPos);
         }
+}
+
+void sys_prnfout(char *fmt)
+{
+        struct specifier ss[1];
+        ss[0].addr = NULL;
+        print_format_string(SYS_OUT_STDOUT, fmt, ss);
+}
+
+void sys_prnferr(char *fmt)
+{
+        struct specifier ss[1];
+        ss[0].addr = NULL;
+        print_format_string(SYS_OUT_STDERR, fmt, ss);
 }
 
 void sys_prnferr_c(char *fmt, char c1)
