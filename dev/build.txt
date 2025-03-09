@@ -64,6 +64,12 @@ an environmental variable.
 
 - 'M_PYTHON = python3 | python': the Python interpreter used.
 
+### System-Interface Options
+- 'M_SYS = stdc | nt': it sets which system interface is used; "stdc" for ISO
+  C interface or "nt" for Windows NT interface. By default, it chooses "stdc".
+  However, it is highly recommended to use the option specifically for your
+  OS.
+
 ### Translation Options
 - 'M_LANG': if set, the translation identifier code. It uses the translation
   in directory 'po/M_LANG/' The available translations and their codes are

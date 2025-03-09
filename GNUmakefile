@@ -119,6 +119,8 @@ M_BUILD_DIR ?= build
 C_SRC_DIR := src
 C_PO_DIR := po
 
+M_SYS ?= stdc
+
 ###
 ### 1.3. Compiler Settings
 ###
@@ -252,7 +254,7 @@ endef
 ### 2.2. Targets
 ###
 
-$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) $(M_BUILD_DIR)/sys$(V_O) $(M_BUILD_DIR)/sys/stdc$(V_O) | build_dir
+$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) $(M_BUILD_DIR)/sys$(V_O) $(M_BUILD_DIR)/sys/$(M_SYS)$(V_O) | build_dir
 	$(call fn_ld_exe,$(word 1,$^) $(word 2,$^) $(word 3,$^),$@)
 
 build_dir:
@@ -261,6 +263,6 @@ build_dir:
 
 $(eval $(call fn_bld_c_obj,ghdisk.fat,1,$(C_SRC_DIR)/lang.h $(C_SRC_DIR)/sys.h))
 $(eval $(call fn_bld_c_obj,sys,,$(C_SRC_DIR)/sys.h))
-$(eval $(call fn_bld_c_obj,sys/stdc,,$(C_SRC_DIR)/sys.h))
+$(eval $(call fn_bld_c_obj,sys/$(M_SYS),,$(C_SRC_DIR)/sys.h))
 
 .PHONY: build_dir
