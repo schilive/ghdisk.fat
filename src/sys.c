@@ -26,6 +26,7 @@ SOFTWARE.
 
 #include <stdio.h>
 #include <string.h>
+#include "sys.h"
 
 static char g_lower_alphabet[] = {
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
@@ -37,19 +38,37 @@ enum specifier_type {
         SPECIFIER_CHAR
 };
 
+enum sys_output {
+        SYS_OUT_STDOUT,
+        SYS_OUT_STDERR
+};
+
 struct specifier {
         void *addr;
         enum specifier_type type;
 };
 
+static void sys_prn(enum sys_output out, char *cs, size_t n)
+{
+        if (out == SYS_OUT_STDOUT)
+                sys_prnout(cs, n);
+        else
+                sys_prnerr(cs, n);
+}
+
+static void sys_prns(enum sys_output out, char *cs)
+{
+        sys_prn(out, cs, strlen(cs));
+}
+
 void sys_prnfout(char *fmt)
 {
-        printf("%s", fmt);
+        sys_prns(SYS_OUT_STDOUT, fmt);
 }
 
 void sys_prnferr(char *fmt)
 {
-        (void)fprintf(stderr, "%s", fmt);
+        sys_prns(SYS_OUT_STDERR, fmt);
 }
 
 static int get_lower_letter_position(char c)
@@ -62,10 +81,10 @@ static int get_lower_letter_position(char c)
         return 0;
 }
 
-static void print_specifier(FILE *out, struct specifier *s)
+static void print_specifier(enum sys_output out, struct specifier *s)
 {
         if (s->type == SPECIFIER_CHAR) {
-                (void)fprintf(out, "%c", *((char*)s->addr));
+                sys_prn(out, (char*)s->addr, 1);
                 return;
         }
         if (s->type == SPECIFIER_STRING) {
@@ -73,16 +92,16 @@ static void print_specifier(FILE *out, struct specifier *s)
                         /* The string "(?null?)" is used instead of "(null)"
                          * because the second can be an actual file on Windows.
                          */
-                        (void)fprintf(stderr, "(?null?)");
+                        sys_prns(out, "(?null?)");
                 }
                 else {
-                        (void)fprintf(stderr, "%s", (char*)s->addr);
+                        sys_prns(out, (char*)s->addr);
                 }
         }
 }
 
 static void print_format_string(
-        FILE *out, 
+        enum sys_output out,
         char *fmt, 
         struct specifier *ss
 )
@@ -98,19 +117,19 @@ static void print_format_string(
                 int alphPos;
 
                 if (*c != '%') {
-                        (void)fprintf(out, "%c", *c);
+                        sys_prn(out, c, 1);
                         continue;
                 }
                 alphPos = get_lower_letter_position(*(c + 1));
                 /* This includes "%%" */
                 if (alphPos == -1) {
-                        (void)fprintf(out, "%%");
+                        sys_prns(out, "%%");
                         continue;
                 }
 
                 c++;
                 if (alphPos >= ssLen) {
-                        (void)fprintf(out, " ");
+                        sys_prns(out, " ");
                         continue;
                 }
                 print_specifier(out, ss + alphPos);
@@ -123,7 +142,7 @@ void sys_prnferr_c(char *fmt, char c1)
         ss[0].addr = &c1;
         ss[0].type = SPECIFIER_CHAR;
         ss[1].addr = NULL;
-        print_format_string(stderr, fmt, ss);
+        print_format_string(SYS_OUT_STDERR, fmt, ss);
 }
 
 void sys_prnferr_s(char *fmt, char *s1)
@@ -132,7 +151,7 @@ void sys_prnferr_s(char *fmt, char *s1)
         ss[0].addr = s1;
         ss[0].type = SPECIFIER_STRING;
         ss[1].addr = NULL;
-        print_format_string(stderr, fmt, ss);
+        print_format_string(SYS_OUT_STDERR, fmt, ss);
 }
 
 void sys_prnferr_ss(char *fmt, char *s1, char *s2)
@@ -143,7 +162,7 @@ void sys_prnferr_ss(char *fmt, char *s1, char *s2)
         ss[1].addr = s2;
         ss[1].type = SPECIFIER_STRING;
         ss[2].addr = NULL;
-        print_format_string(stderr, fmt, ss);
+        print_format_string(SYS_OUT_STDERR, fmt, ss);
 }
 
 void sys_prnferr_sss(char *fmt, char *s1, char *s2, char *s3)
@@ -156,7 +175,7 @@ void sys_prnferr_sss(char *fmt, char *s1, char *s2, char *s3)
         ss[2].addr = s3;
         ss[2].type = SPECIFIER_STRING;
         ss[3].addr = NULL;
-        print_format_string(stderr, fmt, ss);
+        print_format_string(SYS_OUT_STDERR, fmt, ss);
 }
 
 void sys_prnfout_ssssss(
@@ -183,5 +202,5 @@ void sys_prnfout_ssssss(
         ss[5].addr = s6;
         ss[5].type = SPECIFIER_STRING;
         ss[6].addr = NULL;
-        print_format_string(stdout, fmt, ss);
+        print_format_string(SYS_OUT_STDOUT, fmt, ss);
 }

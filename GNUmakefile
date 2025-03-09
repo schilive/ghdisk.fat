@@ -220,7 +220,8 @@ re: clean build
 ###
 
 # Builds '$(C_SRC_DIR)/$1.c' to '$(M_BUILD_DIR)/$1$(V_O)'.
-# Usage: <source c filename>, <translatable>, [<prerequisite headers>]
+# Usage: <source c filepath without extension>, <translatable>,
+# 	[<prerequisite headers>]
 define fn_bld_c_obj
 ifeq ($$(if $2,$$(M_LANG),),)
 
@@ -251,14 +252,15 @@ endef
 ### 2.2. Targets
 ###
 
-$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) $(M_BUILD_DIR)/sys$(V_O) | build_dir
-	$(call fn_ld_exe,$(word 1,$^) $(word 2,$^),$@)
-
-$(eval $(call fn_bld_c_obj,ghdisk.fat,1,$(C_SRC_DIR)/lang.h $(C_SRC_DIR)/sys.h))
-$(eval $(call fn_bld_c_obj,sys,,$(C_SRC_DIR)/sys.h))
+$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) $(M_BUILD_DIR)/sys$(V_O) $(M_BUILD_DIR)/sys/stdc$(V_O) | build_dir
+	$(call fn_ld_exe,$(word 1,$^) $(word 2,$^) $(word 3,$^),$@)
 
 build_dir:
 	$(call fn_fmkdir,$(M_BUILD_DIR))
+	$(call fn_fmkdir,$(M_BUILD_DIR)/sys)
+
+$(eval $(call fn_bld_c_obj,ghdisk.fat,1,$(C_SRC_DIR)/lang.h $(C_SRC_DIR)/sys.h))
+$(eval $(call fn_bld_c_obj,sys,,$(C_SRC_DIR)/sys.h))
+$(eval $(call fn_bld_c_obj,sys/stdc,,$(C_SRC_DIR)/sys.h))
 
 .PHONY: build_dir
-

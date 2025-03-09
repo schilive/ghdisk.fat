@@ -89,6 +89,12 @@ SOFTWARE.
 #ifndef SYS_H
 #define SYS_H
 
+/* Prints to stdout the 'n' first characters of the character array 'cs'. */
+void sys_prnout(char *cs, size_t n);
+
+/* Prints to stderr the 'n' first characters of the character array 'cs'. */
+void sys_prnerr(char *cs, size_t n);
+
 /* Vide header. */
 void sys_prnfout(char *fmt);
 
