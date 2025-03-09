@@ -41,6 +41,21 @@ void sys_init(void)
         g_handle_error = GetStdHandle(STD_ERROR_HANDLE);
 }
 
+/* It tries to write everything. If successful, returns 0, otherwise a non-zero
+ * value.
+ */
+static int full_write(HANDLE out, char *cs, size_t n)
+{
+        while (n != 0) {
+                DWORD wrt;
+                DWORD r = WriteFile(out, cs, n, &wrt, NULL);
+                if (r == FALSE || wrt == 0)
+                        return 1;
+                n -= wrt;
+        }
+        return 0;
+}
+
 /* Prints the character array of length 'n' to the standard device specified in
  * 'out'.
  */
@@ -53,22 +68,20 @@ static void prn(HANDLE out, char *cs, size_t n)
          * are only using ANSI, where the first 127 values are always
          * ASCII-compatible. So, we are safe.
          */
-        size_t off;
         if (sizeof(DWORD) >= sizeof(size_t)) {
-                (void)WriteFile(out, cs, (DWORD)n, NULL, NULL);
+                (void)full_write(out, cs, (DWORD)n);
                 return;
         }
 
-        off = 0;
         while (n != 0) {
-                if (n <= DWORD_MAX) {
-                        (void)WriteFile(out, cs + off, (DWORD)n, NULL, NULL);
-                        break;
-                }
-
-                (void)WriteFile(out, cs + off, DWORD_MAX, NULL, NULL);
-                n -= DWORD_MAX;
-                off += DWORD_MAX;
+                DWORD w;
+                int r;
+                w = n <= DWORD_MAX ? (DWORD)n : DWORD_MAX;
+                r = full_write(out, cs, (DWORD)w);
+                if (r != 0)
+                        return;
+                n -= w;
+                cs += w;
         }
 }
 
