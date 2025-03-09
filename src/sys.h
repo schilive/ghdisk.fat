@@ -38,6 +38,9 @@ SOFTWARE.
  *        3. The character encoding supports a-z, A-Z, "%" and " " (SP).
  *        4. The term "letter" refers to a-z and A-Z, and no letter is encoded
  *        by 0.
+ * Observations:
+ *      1. If the function fails internally, nothing is reported and the error
+ *      is ignored.
  *
  * The function and its usage is explained below, referencing a table. This
  * table is the last "section" of this text.
