@@ -52,6 +52,8 @@ int main(int argc, char *argv[])
         int i;
         int h = 0, v = 0;
         int cmd = -1;
+        sys_init();
+
         if (argv[0] == NULL || argv[1] == NULL) {
                 usage();
                 return 0;

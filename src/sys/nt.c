@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* This file implemenst 'sys_prnout()' and 'sys_prnerr()', with the Win32 API,
- * in a MSVC/MinGW-compatible form.
+/* This file implemenst 'sys_prnout()', 'sys_prnerr()' and 'sys_init()', with
+ * the Win32 API, in a MSVC/MinGW-compatible form.
  */
 
 #include <windows.h>
@@ -31,6 +31,15 @@ SOFTWARE.
 #include "../sys.h"
 
 #define DWORD_MAX ((DWORD)(0xFFFFFFFF))
+
+static HANDLE g_handle_out = INVALID_HANDLE_VALUE;
+static HANDLE g_handle_error = INVALID_HANDLE_VALUE;
+
+void sys_init(void)
+{
+        g_handle_out = GetStdHandle(STD_OUTPUT_HANDLE);
+        g_handle_error = GetStdHandle(STD_ERROR_HANDLE);
+}
 
 static void prn(HANDLE out, char *cs, size_t n)
 {
@@ -62,17 +71,14 @@ static void prn(HANDLE out, char *cs, size_t n)
 
 void sys_prnout(char *cs, size_t n)
 {
-        HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (out == INVALID_HANDLE_VALUE)
+        if (g_handle_out == INVALID_HANDLE_VALUE)
                 return;
-        prn(out, cs, n);
+        prn(g_handle_out, cs, n);
 }
 
 void sys_prnerr(char *cs, size_t n)
 {
-
-        HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
-        if (out == INVALID_HANDLE_VALUE)
+        if (g_handle_error == INVALID_HANDLE_VALUE)
                 return;
-        prn(out, cs, n);
+        prn(g_handle_error, cs, n);
 }

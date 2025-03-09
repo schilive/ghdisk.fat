@@ -22,13 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* This file implemenst 'sys_prnout()' and 'sys_prnerr()', with the standard ISO
- * C library.
+/* This file implemenst 'sys_prnout()', 'sys_prnerr()' and 'sys_init()', with
+ * the standard ISO C library.
  */
 
 #include <stdio.h>
 #include <stddef.h>
 #include "../sys.h"
+
+void sys_init(void)
+{
+        /* Nothing needs to be initialised in ISO C. */
+        return;
+}
 
 void sys_prnout(char *cs, size_t n)
 {

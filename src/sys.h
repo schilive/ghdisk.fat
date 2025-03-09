@@ -24,6 +24,9 @@ SOFTWARE.
 
 /* This defines an OS-agnostic interface with OS-specific implementation.
  *
+ * Before any "system function" is called, the function 'sys_init()' must be
+ * called. Not doing so, may end in undefined behaviour or even a sudden error.
+ *
  * == Print functions ==
  * The print functions do not use 'printf()' interface, to achieve potential
  * enhancements. Instead of the number of parameters being determined by the
@@ -91,6 +94,11 @@ SOFTWARE.
 
 #ifndef SYS_H
 #define SYS_H
+
+/* This function must be called before any other function. It sets the specific
+ * system imlementation to an initial known state.
+ */
+void sys_init(void);
 
 /* Prints to stdout the 'n' first characters of the character array 'cs'. */
 void sys_prnout(char *cs, size_t n);
