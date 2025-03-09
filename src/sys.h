@@ -51,7 +51,7 @@ SOFTWARE.
  * the word "letter" is used, a-z and A-Z is meant.
  *
  * The name of a print function is three texts in series. The first is
- * "sys_prn", which identifies the function as a print function. The second
+ * "sys_prnf", which identifies the function as a print function. The second
  * identifies the output stream; "out" for standard output, and "err" for
  * standard error. The third is optional, its presence and content define
  * the number and type of parameters, and it can make available messages whose
@@ -90,25 +90,25 @@ SOFTWARE.
 #define SYS_H
 
 /* Vide header. */
-void sys_prnout(char *fmt);
+void sys_prnfout(char *fmt);
 
 /* Vide header. */
-void sys_prnerr(char *fmt);
+void sys_prnferr(char *fmt);
 
 /* Vide header. */
-void sys_prnerr_c(char *fmt, char c1);
+void sys_prnferr_c(char *fmt, char c1);
 
 /* Vide header. */
-void sys_prnerr_s(char *fmt, char *s1);
+void sys_prnferr_s(char *fmt, char *s1);
 
 /* Vide header. */
-void sys_prnerr_ss(char *fmt, char *s1, char *s2);
+void sys_prnferr_ss(char *fmt, char *s1, char *s2);
 
 /* Vide header. */
-void sys_prnerr_sss(char *fmt, char *s1, char *s2, char *s3);
+void sys_prnferr_sss(char *fmt, char *s1, char *s2, char *s3);
 
 /* Vide header. */
-void sys_prnout_ssssss(
+void sys_prnfout_ssssss(
         char *m,
         char *s1,
         char *s2,

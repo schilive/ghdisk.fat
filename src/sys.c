@@ -42,12 +42,12 @@ struct specifier {
         enum specifier_type type;
 };
 
-void sys_prnout(char *fmt)
+void sys_prnfout(char *fmt)
 {
         printf("%s", fmt);
 }
 
-void sys_prnerr(char *fmt)
+void sys_prnferr(char *fmt)
 {
         (void)fprintf(stderr, "%s", fmt);
 }
@@ -117,7 +117,7 @@ static void print_format_string(
         }
 }
 
-void sys_prnerr_c(char *fmt, char c1)
+void sys_prnferr_c(char *fmt, char c1)
 {
         struct specifier ss[2];
         ss[0].addr = &c1;
@@ -126,7 +126,7 @@ void sys_prnerr_c(char *fmt, char c1)
         print_format_string(stderr, fmt, ss);
 }
 
-void sys_prnerr_s(char *fmt, char *s1)
+void sys_prnferr_s(char *fmt, char *s1)
 {
         struct specifier ss[2];
         ss[0].addr = s1;
@@ -135,7 +135,7 @@ void sys_prnerr_s(char *fmt, char *s1)
         print_format_string(stderr, fmt, ss);
 }
 
-void sys_prnerr_ss(char *fmt, char *s1, char *s2)
+void sys_prnferr_ss(char *fmt, char *s1, char *s2)
 {
         struct specifier ss[3];
         ss[0].addr = s1;
@@ -146,7 +146,7 @@ void sys_prnerr_ss(char *fmt, char *s1, char *s2)
         print_format_string(stderr, fmt, ss);
 }
 
-void sys_prnerr_sss(char *fmt, char *s1, char *s2, char *s3)
+void sys_prnferr_sss(char *fmt, char *s1, char *s2, char *s3)
 {
         struct specifier ss[5];
         ss[0].addr = s1;
@@ -159,7 +159,7 @@ void sys_prnerr_sss(char *fmt, char *s1, char *s2, char *s3)
         print_format_string(stderr, fmt, ss);
 }
 
-void sys_prnout_ssssss(
+void sys_prnfout_ssssss(
         char *fmt,
         char *s1,
         char *s2,

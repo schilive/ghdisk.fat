@@ -31,7 +31,7 @@ SOFTWARE.
 
 static void usage(void)
 {
-        sys_prnout_ssssss(
+        sys_prnfout_ssssss(
                 "%a: [ops...] <%b> <%c...>\n"
                 "%d:\n"
                 "        --help, -h      %e.\n"
@@ -44,7 +44,7 @@ static void usage(void)
 
 static void version(void)
 {
-        sys_prnout("Version 0.0.0\n");
+        sys_prnfout("Version 0.0.0\n");
 }
 
 int main(int argc, char *argv[])
@@ -94,12 +94,12 @@ int main(int argc, char *argv[])
                 if (h || v)
                         break;
 
-                sys_prnerr_ss("%a: %b: '", _("Fatal error"), _("unknown option given"));
+                sys_prnferr_ss("%a: %b: '", _("Fatal error"), _("unknown option given"));
                 if (opt_long)
-                        sys_prnerr_s("%a", arg);
+                        sys_prnferr_s("%a", arg);
                 else
-                        sys_prnerr_c("-%a", arg[1]);
-                sys_prnerr("'\n");
+                        sys_prnferr_c("-%a", arg[1]);
+                sys_prnferr("'\n");
                 return 1;
         }
 
@@ -114,12 +114,12 @@ int main(int argc, char *argv[])
 
         if (cmd == -1)
                 goto error_no_command;
-        sys_prnerr_sss("%a: %b: '%c'\n", 
+        sys_prnferr_sss("%a: %b: '%c'\n", 
                 _("Fatal error"), _("unknown command given"), argv[1]);
         return 1;
 
 error_no_command:
-        sys_prnerr_ss("%a: %b\n",
+        sys_prnferr_ss("%a: %b\n",
                 _("Fatal error"), _("no command given"));
         return 1;
 }
