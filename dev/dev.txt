@@ -8,7 +8,8 @@ the function of that file.
 
 ## Documenting
 There is a hierarchy of documentation forms, where the lower item assumes
-knowledge of the higher item.
+knowledge of the higher item. It is OK to deviate if it is _more readable_
+that way.
         - 'dev/structure.txt': explains the project from a high-level view.
         - File-specific header comment. If the file is evidently an
           implementation of another header file, the header file's header
@@ -17,8 +18,7 @@ knowledge of the higher item.
         - File-, structure- or macro-specific implementation comment.
 
 Every function, structure and macro should have a comment describing its
-interface for use, even if it is obvious, like 'int abs(int x)'. An exceptin
-are the print functions.
+interface for use, even if it is obvious, like 'int abs(int x)'.
 
 ## Keeping the Project Translatable
 When using a translatable string, use '_("STR")' or '_("S1" "S2" ..)'. Do not
