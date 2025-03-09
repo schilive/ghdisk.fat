@@ -41,6 +41,9 @@ void sys_init(void)
         g_handle_error = GetStdHandle(STD_ERROR_HANDLE);
 }
 
+/* Prints the character array of length 'n' to the standard device specified in
+ * 'out'.
+ */
 static void prn(HANDLE out, char *cs, size_t n)
 {
         /* The function 'WriteFile()' also works with console handles, but the

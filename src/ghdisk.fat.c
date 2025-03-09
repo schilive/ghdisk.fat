@@ -29,6 +29,7 @@ SOFTWARE.
 #include "lang.h"
 #include "sys.h"
 
+/* Prints the help message. */
 static void usage(void)
 {
         sys_prnfout_ssssss(
@@ -42,6 +43,9 @@ static void usage(void)
         );
 }
 
+/* Prints the version message, whose format should be constant and
+ * language-agnostic, so it _may_ be used for scripting.
+ */
 static void version(void)
 {
         sys_prnfout("Version 0.0.0\n");

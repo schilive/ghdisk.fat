@@ -30,6 +30,7 @@ SOFTWARE.
 #include <string.h>
 #include "sys.h"
 
+/* A 0-terminated array of all lower-case letters (a-z). */
 static char g_lower_alphabet[] = {
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
         'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'z', 0
@@ -45,11 +46,15 @@ enum sys_output {
         SYS_OUT_STDERR
 };
 
+/* The 'addr' refers to the pointer of the parameter to be used for printing. */
 struct specifier {
         void *addr;
         enum specifier_type type;
 };
 
+/* Prints a character array of length 'n' to the output specified by 'out'.
+ * This makes implementing the functions below a tad easier.
+ */
 static void sys_prn(enum sys_output out, char *cs, size_t n)
 {
         if (out == SYS_OUT_STDOUT)
@@ -58,6 +63,10 @@ static void sys_prn(enum sys_output out, char *cs, size_t n)
                 sys_prnerr(cs, n);
 }
 
+/* Like 'sys_prn()', but of the character array's length being determined by a
+ * parameter, the character array is a NULL-terminated string. This is a QoF
+ * function, really.
+ */
 static void sys_prns(enum sys_output out, char *cs)
 {
         sys_prn(out, cs, strlen(cs));
@@ -77,6 +86,9 @@ static int get_lower_letter_position(char c)
         return -1;
 }
 
+/* The function prints the message according to the specifier's letter and its
+ * correspondent parameter.
+ */
 static void print_specifier(enum sys_output out, struct specifier *s)
 {
         if (s->type == SPECIFIER_CHAR) {
@@ -96,6 +108,13 @@ static void print_specifier(enum sys_output out, struct specifier *s)
         }
 }
 
+/* This takes as input the same thing as the format print funtcions, but in a
+ * more generic way.
+ *      - 'out' is the output stream/file.
+ *      - 'fmt': is the format string.
+ *      - 'ss': is the specifiers list and the pointer to their correspondent
+ *      parameter value.
+ */
 static void print_format_string(
         enum sys_output out,
         char *fmt, 
