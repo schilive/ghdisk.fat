@@ -63,6 +63,10 @@ static void sys_prns(enum sys_output out, char *cs)
         sys_prn(out, cs, strlen(cs));
 }
 
+
+/* If 'c' is not a lower-case letter (a-z), then -1 is returned. Otherwise its
+ * position minus 1 is returned.
+ */
 static int get_lower_letter_position(char c)
 {
         int i;
@@ -70,7 +74,7 @@ static int get_lower_letter_position(char c)
                 if (c == g_lower_alphabet[i])
                         return i;
         }
-        return 0;
+        return -1;
 }
 
 static void print_specifier(enum sys_output out, struct specifier *s)
@@ -115,7 +119,7 @@ static void print_format_string(
                 alphPos = get_lower_letter_position(*(c + 1));
                 /* This includes "%%" */
                 if (alphPos == -1) {
-                        sys_prns(out, "%%");
+                        sys_prns(out, "%");
                         continue;
                 }
 
