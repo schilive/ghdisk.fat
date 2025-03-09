@@ -55,18 +55,18 @@ static void prn(HANDLE out, char *cs, size_t n)
          */
         size_t off;
         if (sizeof(DWORD) >= sizeof(size_t)) {
-                WriteFile(out, cs, (DWORD)n, NULL, NULL);
+                (void)WriteFile(out, cs, (DWORD)n, NULL, NULL);
                 return;
         }
 
         off = 0;
         while (n != 0) {
                 if (n <= DWORD_MAX) {
-                        WriteFile(out, cs + off, (DWORD)n, NULL, NULL);
+                        (void)WriteFile(out, cs + off, (DWORD)n, NULL, NULL);
                         break;
                 }
 
-                WriteFile(out, cs + off, DWORD_MAX, NULL, NULL);
+                (void)WriteFile(out, cs + off, DWORD_MAX, NULL, NULL);
                 n -= DWORD_MAX;
                 off += DWORD_MAX;
         }
