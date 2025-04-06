@@ -26,7 +26,7 @@ SOFTWARE.
 
 #include "../ghdisk.fat.h"
 
-int main(int argc, char *argv)
+int main(int argc, char **argv)
 {
         return ghdisk_fat(argc, argv);
 }

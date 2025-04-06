@@ -26,4 +26,4 @@ SOFTWARE.
  * function redirects to it.
  */
 
-int ghdisk_fat(int argc, char *argv);
+int ghdisk_fat(int argc, char **argv);
