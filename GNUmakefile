@@ -143,6 +143,9 @@ ifeq ($(M_COMPILER_MSVC),0)
     ifneq ($(origin M_LANG),undefined)
         M_CFLAGS += -D_GLOBAL_NOLANGH
     endif
+    ifeq ($(M_ENTRY),nt)
+        V_LFLAGS_TARGET = -nostartfiles -nostdlib -Wl,-e,_start -lkernel32 -luser32 -lshell32
+    endif
 else
     V_O := .o
     M_CC ?= CL
@@ -158,6 +161,9 @@ else
     endif
     ifneq ($(origin M_LANG),undefined)
         M_CFLAGS += /D _GLOBAL_NOLANGH
+    endif
+    ifeq ($(M_ENTRY),nt)
+        V_LFLAGS_TARGET = /NODEFAULTLIB /ENTRY:_start /SUBSYSTEM:CONSOLE user32.lib main.obj
     endif
 endif
 
@@ -185,11 +191,11 @@ endif
 # Usage: <input> ..., <output>
 ifeq ($(M_COMPILER_MSVC),0)
     define fn_ld_exe
-        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) -o $(2) $(1)
+        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) -o $(2) $(1) $(V_LFLAGS_TARGET)
     endef
 else
     define fn_ld_exe
-        $(M_LD) $(M_LFLAGS) $(M_ALFLAGS) /OUT:$(2) $(1)
+        $(M_LD) $(M_LFLAGS) $(M_ALFLAGS) /OUT:$(2) $(1) $(V_LFLAGS_TARGET)
     endef
 endif
 

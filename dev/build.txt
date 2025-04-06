@@ -70,9 +70,11 @@ an environmental variable.
   POSIX C interface, which assumes that 'SSIZE_MAX <= SIZE_MAX'. By default,
   it chooses "stdc". However, it is highly recommended to use the option
   specifically for your OS.
-- 'M_ENTRY = stdc': it sets the entry function used. If set to "stdc"
-  (default), it uses the classic 'int main()' function, which initiates the
-  standard library.
+- 'M_ENTRY = stdc | nt': it sets the entry function used. If set to "stdc"
+  (default), it uses the standard 'int main()' function, which initiates the
+  standard library. If set to 'nt', it does include the C standard library or
+  its initial files, and uses a custom entry function with "Windows NT"-only
+  implementation, which makes the final executable much smaller.
 
 ### Translation Options
 - 'M_LANG': if set, the translation identifier code. It uses the translation
