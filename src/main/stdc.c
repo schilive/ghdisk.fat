@@ -24,7 +24,7 @@ SOFTWARE.
 
 /* This implements the ISO C entry function, called 'main()'. */
 
-#include "ghdisk.fat.h"
+#include "../ghdisk.fat.h"
 
 int main(int argc, char *argv)
 {
