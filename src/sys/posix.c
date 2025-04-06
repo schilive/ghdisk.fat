@@ -45,7 +45,7 @@ void sys_init(void)
 static void full_write(int fd, char *cs, size_t n)
 {
         while (n != 0) {
-                ssize_t r = write(FD_STDERR, cs, n);
+                ssize_t r = write(fd, cs, n);
                 if (r == 0)
                         return;
                 n -= r;
