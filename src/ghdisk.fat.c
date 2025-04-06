@@ -24,8 +24,6 @@ SOFTWARE.
 
 /* This is the entry function. */
 
-#include <stdio.h>
-#include <string.h>
 #include "lang.h"
 #include "sys.h"
 
@@ -73,11 +71,11 @@ int ghdisk_fat(int argc, char *argv[])
                 opt_long = arg[1] == '-';
 
                 if (opt_long) {
-                        if (strcmp(arg, "--help") == 0) {
+                        if (sys_streq(arg, "--help")) {
                                 h = 1;
                                 continue;
                         }
-                        if (strcmp(arg, "--version") == 0) {
+                        if (sys_streq(arg, "--version")) {
                                 v = 1;
                                 continue;
                         }

@@ -98,3 +98,13 @@ void sys_prnerr(char *cs, size_t n)
                 return;
         prn(g_handle_error, cs, n);
 }
+
+size_t sys_strlen(char *s)
+{
+        return lstrlenA((LPSTR)s);
+}
+
+int sys_streq(char *s1, char *s2)
+{
+        return lstrcmpA(s1, s2) == 0;
+}

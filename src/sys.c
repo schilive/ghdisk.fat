@@ -26,8 +26,6 @@ SOFTWARE.
  * implementation of the print function.
  */
 
-#include <stdio.h>
-#include <string.h>
 #include "sys.h"
 
 /* A 0-terminated array of all lower-case letters (a-z). */
@@ -69,7 +67,7 @@ static void sys_prn(enum sys_output out, char *cs, size_t n)
  */
 static void sys_prns(enum sys_output out, char *cs)
 {
-        sys_prn(out, cs, strlen(cs));
+        sys_prn(out, cs, sys_strlen(cs));
 }
 
 

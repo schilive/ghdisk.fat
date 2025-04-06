@@ -61,3 +61,13 @@ void sys_prnerr(char *cs, size_t n)
 {
         full_write(FD_STDERR, cs, n);
 }
+
+size_t sys_strlen(char *s)
+{
+        return strlen(s);
+}
+
+int sys_streq(char *s1, char *s2)
+{
+        return strcmp(s1, s2) == 0;
+}

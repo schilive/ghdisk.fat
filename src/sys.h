@@ -95,6 +95,8 @@ SOFTWARE.
 #ifndef SYS_H
 #define SYS_H
 
+#include <stddef.h>
+
 /* This function must be called before any other function. It sets the specific
  * system imlementation to an initial known state.
  */
@@ -134,5 +136,11 @@ void sys_prnfout_ssssss(
         char *s5,
         char *s6
 );
+
+/* Returns the number of character in the C string 's'. */
+size_t sys_strlen(char *s);
+
+/* Returns whether the C strings 's1' and 's2' are equal. */
+int sys_streq(char *s1, char *s2);
 
 #endif /* SYS_H */
