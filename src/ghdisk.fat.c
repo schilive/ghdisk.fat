@@ -51,7 +51,7 @@ static void version(void)
         sys_prnfout("Version 0.0.0\n");
 }
 
-int main(int argc, char *argv[])
+int ghdisk_fat(int argc, char *argv[])
 {
         int i;
         int h = 0, v = 0;

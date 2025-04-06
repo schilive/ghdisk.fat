@@ -256,14 +256,15 @@ endef
 ### 2.2. Targets
 ###
 
-$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) $(M_BUILD_DIR)/sys$(V_O) $(M_BUILD_DIR)/sys/$(M_SYS)$(V_O) | build_dir
-	$(call fn_ld_exe,$(word 1,$^) $(word 2,$^) $(word 3,$^),$@)
+$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) $(M_BUILD_DIR)/main$(V_O) $(M_BUILD_DIR)/sys$(V_O) $(M_BUILD_DIR)/sys/$(M_SYS)$(V_O) | build_dir
+	$(call fn_ld_exe,$(word 1,$^) $(word 2,$^) $(word 3,$^) $(word 4,$^),$@)
 
 build_dir:
 	$(call fn_fmkdir,$(M_BUILD_DIR))
 	$(call fn_fmkdir,$(M_BUILD_DIR)/sys)
 
-$(eval $(call fn_bld_c_obj,ghdisk.fat,1,$(C_SRC_DIR)/lang.h $(C_SRC_DIR)/sys.h))
+$(eval $(call fn_bld_c_obj,ghdisk.fat,1,$(C_SRC_DIR)/lang.h $(C_SRC_DIR)/sys.h $(C_SRC_DIR)/ghdisk.fat.h))
+$(eval $(call fn_bld_c_obj,main,,$(C_SRC_DIR)/ghdisk.fat.h))
 $(eval $(call fn_bld_c_obj,sys,,$(C_SRC_DIR)/sys.h))
 $(eval $(call fn_bld_c_obj,sys/$(M_SYS),,$(C_SRC_DIR)/sys.h))
 
