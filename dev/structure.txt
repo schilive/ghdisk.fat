@@ -18,6 +18,36 @@ beyond ISO C.
 - Windows 2000: Win32 API through C in a manner compatible with MinGW and MSVC.
 - POSIX: the POSIX C API, focusing mostly on glibc.
 
+## Entry Function
+Normally, 'int main(int argc, char *argv[])' is the entry function, as defined
+by the ISO C and POSIX standards. In the usual compiler implementation of C,
+the compiler links to a set of "initial files" which contain the actual entry
+function, that initiates the C standard library, correctly calls 'main()' and
+correctly exists. This behaviour is often the desired one, but it has caveats.
+        - It links to the "initial files" and C standard library files,
+          probably including the extensions of the specific compiler. This
+          makes the final executable considerably larger (~80 KB in my
+          experience).
+        - You have no control over the use of resources by the initialisation,
+          by the functions and their relation to the structures, such as how
+          much memory it allocates, what files it uses, what is assumes from
+          the system, and how to deal with errors. Further, there is no
+          control over how the OS-specific interface is used.
+
+Hence, the project has 2 entry functions: the "logical" entry function
+('ghdisk_fat()'), which takes 'argc' and 'argv'; the "real" entry function,
+which is 'main()' by default. The "real" entry function may be selected to be
+either the standard C 'main()' function or another. This is done through
+compiler-specific flags and using an OS-specific "custom", but more direct,
+entry function. Its OS-specific condition is necessary because the only
+non--OS-specific interface is the standard C library, which cannot be safely
+used (with notable exception, such as '<stddef.h>'), because it is not
+initialised.
+
+This also means that standard C library functions will not be allowed in the
+source code except in OS-specific contexts and libraries which are not
+OS-dependent, such as '<stddef.h>'.
+
 ## Translation System
 If the project is built without translation (i.e. M_LANG is unset), then '_'
 is a function defined in 'lang.h', which simply returns its argument. If the
