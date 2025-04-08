@@ -22,13 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* This defines the function _, for non-multilingual use. */
+/* This implements 'lang.h' */
 
-#ifndef LANG_H
-#define LANG_H
+#include "lang.h"
 
-#ifndef _GLOBAL_NOLANGH
-char *_(char *s);
-#endif
-
-#endif /* LANG_H */
+char *_(char *s)
+{
+        return s;
+}

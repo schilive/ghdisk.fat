@@ -263,8 +263,8 @@ endef
 ### 2.2. Targets
 ###
 
-$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) $(M_BUILD_DIR)/main/$(M_ENTRY)$(V_O) $(M_BUILD_DIR)/sys$(V_O) $(M_BUILD_DIR)/sys/$(M_SYS)$(V_O) | build_dir
-	$(call fn_ld_exe,$(word 1,$^) $(word 2,$^) $(word 3,$^) $(word 4,$^),$@)
+$(M_BUILD_DIR)/$(M_TARGET)$(V_E): $(M_BUILD_DIR)/ghdisk.fat$(V_O) $(M_BUILD_DIR)/main/$(M_ENTRY)$(V_O) $(M_BUILD_DIR)/lang$(V_O) $(M_BUILD_DIR)/sys$(V_O) $(M_BUILD_DIR)/sys/$(M_SYS)$(V_O) | build_dir
+	$(call fn_ld_exe,$(word 1,$^) $(word 2,$^) $(word 3,$^) $(word 4,$^) $(word 5,$^),$@)
 
 # This creates the same directory structure expected of the source directory
 build_dir:
@@ -274,6 +274,7 @@ build_dir:
 
 $(eval $(call fn_bld_c_obj,ghdisk.fat,1,$(C_SRC_DIR)/lang.h $(C_SRC_DIR)/sys.h $(C_SRC_DIR)/ghdisk.fat.h))
 $(eval $(call fn_bld_c_obj,main/$(M_ENTRY),,$(C_SRC_DIR)/ghdisk.fat.h))
+$(eval $(call fn_bld_c_obj,lang,,$(C_SRC_DIR)/lang.h))
 $(eval $(call fn_bld_c_obj,sys,,$(C_SRC_DIR)/sys.h))
 $(eval $(call fn_bld_c_obj,sys/$(M_SYS),,$(C_SRC_DIR)/sys.h))
 
