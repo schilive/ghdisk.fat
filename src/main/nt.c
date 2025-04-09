@@ -31,6 +31,30 @@ SOFTWARE.
 #include "../sys.h"
 #include "../lang.h"
 
+static void print_last_error(void)
+{
+        DWORD err = GetLastError();
+        LPSTR msg;
+        DWORD r = FormatMessageA(
+                FORMAT_MESSAGE_ALLOCATE_BUFFER
+                | FORMAT_MESSAGE_FROM_SYSTEM
+                | FORMAT_MESSAGE_IGNORE_INSERTS,
+                NULL,
+                err,
+                0,
+                msg,
+                0, /* MS docs used 0 in the example */
+                NULL
+        );
+        if (r == 0) {
+                sys_prnferr_s("[%a]", 
+                        _("Could not get error message from system"));
+                return;
+        }
+        sys_prnferr_s("%a", msg);
+        LocalFree(msg);
+}
+
 void _start(void)
 {
         LPWSTR args;
@@ -46,10 +70,12 @@ void _start(void)
         args = GetCommandLineW();
         wArgv = CommandLineToArgvW(args, &argc);
         if (wArgv == NULL) {
-                sys_prnferr_ss("%a: %b\n", 
+                sys_prnferr_ss("%a: %b: ", 
                         _("Fatal error"), 
                         _("Could not get command-line argument")
                 );
+                print_last_error();
+                sys_prnferr("\n");
                 ExitProcess(1);
         }
 
@@ -63,10 +89,12 @@ void _start(void)
                 + ((SIZE_T)argc + 1)* sizeof(char*)
         );
         if (argv == NULL) {
-                sys_prnferr_ss("%a: %b\n",
+                sys_prnferr_ss("%a: %b: ",
                         _("Fatal error"),
                         _("Could not parse Windows command-line")
                 );
+                print_last_error();
+                sys_prnferr("\n");
                 ExitProcess(1);
         }
 
@@ -96,10 +124,12 @@ void _start(void)
                                 NULL
                         );
                         if (r == 0) {
-                                sys_prnferr_ss("%a: %b\n",
+                                sys_prnferr_ss("%a: %b: ",
                                         _("Fatal error"),
                                         _("Could not convert command-line from UTF-16 to ANSI")
                                 );
+                                print_last_error();
+                                sys_prnferr("\n");
                                 ExitProcess(1);
                         }
 

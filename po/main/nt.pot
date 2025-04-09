@@ -10,3 +10,6 @@ msgstr ""
 msgid "Could not convert command-line from UTF-16 to ANSI"
 msgstr ""
 
+msgid "Could not get error message from system"
+msgstr ""
+

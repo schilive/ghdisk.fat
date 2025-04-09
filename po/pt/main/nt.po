@@ -10,3 +10,6 @@ msgstr "Error fatal"
 msgid "Could not convert command-line from UTF-16 to ANSI"
 msgstr "Nao foi possivel converter a linha de comando de UTF-16 para ANSI"
 
+msgid "Could not get error message from system"
+msgstr "Nao foi possivel obter a mensagem de erro do sistema"
+
