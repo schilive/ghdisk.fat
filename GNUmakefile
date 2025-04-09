@@ -147,7 +147,7 @@ ifeq ($(M_COMPILER_MSVC),0)
         V_LFLAGS_TARGET = -nostartfiles -nostdlib -Wl,-e,_start -lkernel32 -luser32 -lshell32
     endif
 else
-    V_O := .o
+    V_O := .obj
     M_CC ?= CL
     M_LD ?= LINK
     M_CFLAGS ?= /Wall
