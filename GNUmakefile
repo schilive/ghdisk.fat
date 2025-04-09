@@ -163,7 +163,10 @@ else
         M_CFLAGS += /D _GLOBAL_NOLANGH
     endif
     ifeq ($(M_ENTRY),nt)
-        V_LFLAGS_TARGET = /NODEFAULTLIB /ENTRY:_start /SUBSYSTEM:CONSOLE user32.lib main.obj
+	# The "/GS" is ON by default, and we deactivate it because it needs the
+	# MSVCRT, which is not available with this build.
+	M_CFLAGS += /GS-
+        V_LFLAGS_TARGET = /NODEFAULTLIB /ENTRY:_start /SUBSYSTEM:CONSOLE user32.lib kernel32.lib shell32.lib
     endif
 endif
 
