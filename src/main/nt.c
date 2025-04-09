@@ -111,5 +111,6 @@ void _start(void)
         argv[argc] = NULL;
 
         r = ghdisk_fat(argc, argv);
+        /* Type 'int' in MinGW and MSVC, is 4 bytes, like 'DWORD' */
         ExitProcess((DWORD)r);
 }
