@@ -36,7 +36,7 @@ SOFTWARE.
 #define FD_STDOUT       1
 #define FD_STDERR       0
 
-void sys_init(void)
+void sys_init_console(void)
 {
         /* Nothing has to be initalised. */
         return;

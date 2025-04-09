@@ -1,0 +1,12 @@
+msgid "Could not get command-line argument"
+msgstr "Nao foi possivel obter os argumentos da linha de comando"
+
+msgid "Could not parse Windows command-line"
+msgstr "Nao foi possivel analisar sintaticamente a linha de comando"
+
+msgid "Fatal error"
+msgstr "Error fatal"
+
+msgid "Could not convert command-line from UTF-16 to ANSI"
+msgstr "Nao foi possivel converter a linha de comando de UTF-16 para ANSI"
+

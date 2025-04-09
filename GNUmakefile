@@ -276,7 +276,7 @@ build_dir:
 	$(call fn_fmkdir,$(M_BUILD_DIR)/main)
 
 $(eval $(call fn_bld_c_obj,ghdisk.fat,1,$(C_SRC_DIR)/lang.h $(C_SRC_DIR)/sys.h $(C_SRC_DIR)/ghdisk.fat.h))
-$(eval $(call fn_bld_c_obj,main/$(M_ENTRY),,$(C_SRC_DIR)/ghdisk.fat.h))
+$(eval $(call fn_bld_c_obj,main/$(M_ENTRY),$(C_SRC_DIR)/ghdisk.fat.h))
 $(eval $(call fn_bld_c_obj,lang,,$(C_SRC_DIR)/lang.h))
 $(eval $(call fn_bld_c_obj,sys,,$(C_SRC_DIR)/sys.h))
 $(eval $(call fn_bld_c_obj,sys/$(M_SYS),,$(C_SRC_DIR)/sys.h))

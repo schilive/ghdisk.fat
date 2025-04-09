@@ -31,7 +31,7 @@ SOFTWARE.
 #include <string.h>
 #include "../sys.h"
 
-void sys_init(void)
+void sys_init_console(void)
 {
         /* Nothing needs to be initialised in ISO C. */
         return;

@@ -28,5 +28,6 @@ SOFTWARE.
 
 int main(int argc, char **argv)
 {
+        sys_init_console();
         return ghdisk_fat(argc, argv);
 }

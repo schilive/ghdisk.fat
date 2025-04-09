@@ -97,10 +97,14 @@ SOFTWARE.
 
 #include <stddef.h>
 
-/* This function must be called before any other function. It sets the specific
- * system imlementation to an initial known state.
+/* This function initiates the context to enable printing, using the print
+ * functions in here. It is undefined behaviour to call a printing function
+ * before calling this function. If it fails to initiates to context to print to
+ * the stdout or stderr stream, no error information is returned, but the
+ * function which print to that stream whose initialisation failed, will simply
+ * print into the void. No error.
  */
-void sys_init(void);
+void sys_init_console(void);
 
 /* Prints to stdout the 'n' first characters of the character array 'cs'. */
 void sys_prnout(char *cs, size_t n);

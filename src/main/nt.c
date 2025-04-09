@@ -28,6 +28,8 @@ SOFTWARE.
 
 #include <windows.h>
 #include "../ghdisk.fat.h"
+#include "../sys.h"
+#include "../lang.h"
 
 void _start(void)
 {
@@ -39,10 +41,17 @@ void _start(void)
         int i;
         SIZE_T off;
         int r;
+        sys_init_console();
+
         args = GetCommandLineW();
         wArgv = CommandLineToArgvW(args, &argc);
-        if (wArgv == NULL)
-                ExitProcess(-1);
+        if (wArgv == NULL) {
+                sys_prnferr_ss("%a: %b\n", 
+                        _("Fatal error"), 
+                        _("Could not get command-line argument")
+                );
+                ExitProcess(1);
+        }
 
         argvSz = 0;
         for (i = 0; i < argc; i++)
@@ -53,8 +62,13 @@ void _start(void)
                 + (SIZE_T)argc
                 + ((SIZE_T)argc + 1)* sizeof(char*)
         );
-        if (argv == NULL)
-                ExitProcess(-2);
+        if (argv == NULL) {
+                sys_prnferr_ss("%a: %b\n",
+                        _("Fatal error"),
+                        _("Could not parse Windows command-line")
+                );
+                ExitProcess(1);
+        }
 
         off = 0;
         for (i = 0; i < argc; i++) {
@@ -81,8 +95,13 @@ void _start(void)
                                 &dft,
                                 NULL
                         );
-                        if (r == 0)
-                                ExitProcess(-3);
+                        if (r == 0) {
+                                sys_prnferr_ss("%a: %b\n",
+                                        _("Fatal error"),
+                                        _("Could not convert command-line from UTF-16 to ANSI")
+                                );
+                                ExitProcess(1);
+                        }
 
                         arg2[j] = c2;
                 }

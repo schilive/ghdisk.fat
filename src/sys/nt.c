@@ -35,7 +35,7 @@ SOFTWARE.
 static HANDLE g_handle_out = INVALID_HANDLE_VALUE;
 static HANDLE g_handle_error = INVALID_HANDLE_VALUE;
 
-void sys_init(void)
+void sys_init_console(void)
 {
         g_handle_out = GetStdHandle(STD_OUTPUT_HANDLE);
         g_handle_error = GetStdHandle(STD_ERROR_HANDLE);
