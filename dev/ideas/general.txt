@@ -13,10 +13,14 @@ it can be restored.
 select raw device, as a possible substitute of "-f" on MS-DOS/MS-WIN.
 7. Kanji support. Somethings were different when Kanji was supported.
 
+# A bit Looney
+1. Add option/command to find differences between FATs.
+
 # Kinda Looney
 1. A "script"-like file interpreted by the program to do the actions proposed.
 It would present the actions and the error conditions. This would make so that
 file would not have to be reopened lots of times.
+2. Add an option for recovery.
 
 # Looney
 1. Make a daemon/service to open and make actions on the file.
