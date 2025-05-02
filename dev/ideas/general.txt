@@ -12,6 +12,8 @@ it can be restored.
 6. Options "--msdos-volume", to select raw volume, and "--msdos-device", to
 select raw device, as a possible substitute of "-f" on MS-DOS/MS-WIN.
 7. Kanji support. Somethings were different when Kanji was supported.
+8. Edit volume to change geometry and size to fit e.g. a 5" floppy disk image
+into a 3" floppy disk. However, also support HDDs.
 
 # A bit Looney
 1. Add option/command to find differences between FATs.
