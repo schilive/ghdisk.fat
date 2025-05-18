@@ -1,0 +1,15 @@
+# Things to Know Before Developing
+## Header Comments
+Always write a licence header comment and another, below, at least explaining
+the function of that file.
+
+## Documenting
+There is a hierarchy of documentation forms, where the lower item assumes
+knowledge of the higher item. It is OK to deviate if it is _more readable_
+that way.
+        - 'dev/structure.txt': explains the project from a high-level view.
+        - File-specific header comment. If the file is evidently an
+          implementation of another header file, the header file's header
+          comment is also assumed.
+        - File-, structure- or macro-specific interface comment.
+        - File-, structure- or macro-specific implementation comment.

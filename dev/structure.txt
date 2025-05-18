@@ -1,0 +1,7 @@
+The documentation does not describe the file structure created by
+'GNUmakefile'. This is because 'GNUmakefile' should be easy _enough_ to
+understand after reading all developer documentation.
+
+## File Structure
+- 'src/': source code.
+- 'dev/': developer-oriented documentation.

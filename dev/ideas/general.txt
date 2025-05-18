@@ -1,0 +1,31 @@
+# Regular-Header
+1. Identify FAT version with different methods; for example, like the FAT
+specification X, like Windows driver, like MS-DOS version X, like Linux'
+driver.
+2. Use an environmental variable to specify the file being handled, the FAT
+version identification method, the FAT file being modified, and maybe other
+things.
+3. For commands that change the volume, make a file describing the changes so
+it can be restored.
+4. MS-DOS boolotader, and maybe of other OSes, too.
+5. Any code in the bootloader.
+6. Options "--msdos-volume", to select raw volume, and "--msdos-device", to
+select raw device, as a possible substitute of "-f" on MS-DOS/MS-WIN.
+7. Kanji support. Somethings were different when Kanji was supported.
+8. Edit volume to change geometry and size to fit e.g. a 5" floppy disk image
+into a 3" floppy disk. However, also support HDDs.
+
+# A bit Looney
+1. Add option/command to find differences between FATs.
+
+# Kinda Looney
+1. A "script"-like file interpreted by the program to do the actions proposed.
+It would present the actions and the error conditions. This would make so that
+file would not have to be reopened lots of times.
+2. Add an option for recovery.
+
+# Looney
+1. Make a daemon/service to open and make actions on the file.
+2. Mount the file image.
+3. Make a CLI interpreter that opens the FAT image and takes command from the
+user, so they can execute commands.

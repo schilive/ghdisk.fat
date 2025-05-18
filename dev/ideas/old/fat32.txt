@@ -1,0 +1,11 @@
+1. Extended flags.
+        A) Active FAT (0-3).
+        B) Whether to disable FAT mirroring.
+2. Root directory cluster
+3. FSInfo (#1).
+4. Bootsector backup sector (0 or 6).
+
+# 1 - FSInfo
+
+1. Last known free cluster _count_.
+2. First free cluster in the volume.
