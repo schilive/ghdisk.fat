@@ -13,7 +13,7 @@ The project is licensed under the MIT licence, with a copy on 'LICENCE'.
 
 The project uses C89/C90/ANSI C, and is build using GNU Make with GNU
 extensions. It supports Windows NT (Windows >=2000) and POSIX as host OSes. It
-only supports the GCC/Clang compilers.
+supports the GCC/Clang and MSVC compilers
 
 To build with the default settings, simply use `make`, which will auto-detect
 the host OS and build the project into the `build/` directory.

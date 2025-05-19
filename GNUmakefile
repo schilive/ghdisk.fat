@@ -57,12 +57,36 @@ endif
 endif
 
 ###
-### 1.2. Etc.
+### 1.2. Compiler
 ###
 
-M_O ?= .o
-M_CFLAGS ?= -Wall -Wextra -pedantic -std=c89
+M_COMPILER ?= gcc
+ifneq ($(M_COMPILER),gcc)
+ifneq ($(M_COMPILER),msvc)
+    $(error Error: Value of 'M_COMPILER' in invalid: "$(M_COMPILER)".\
+        Unsupported compiler command-line syntax)
+endif
+endif
+
+ifeq ($(M_COMPILER),gcc)
+    M_CC ?= gcc
+    M_LD ?= $(M_CC)
+    M_O ?= .o
+    M_CFLAGS ?= -Wall -Wextra -pedantic -std=c89
+else
+ifeq ($(M_COMPILER),msvc)
+    M_CC ?= cl
+    M_LD ?= LINK
+    M_O ?= .obj
+    M_CFLAGS ?= /Wall
+endif
+endif
+
 M_ACFLAGS ?=
+
+###
+### 1.3. Etc.
+###
 
 M_TARGET ?= ghdisk.fat
 M_BUILD_DIR ?= build
@@ -70,6 +94,10 @@ M_BUILD_DIR ?= build
 ####
 #### 2. Macros
 ####
+
+###
+### 2.1. OS-Specific
+###
 
 # Creates a directory if it already does not exist. If it could not create the
 # directory, it logs and returns an error. It allows to define a directory in a
@@ -112,6 +140,38 @@ ifeq ($(M_HOST_OS),posix)
 endif
 endif
 
+###
+### 2.2. Compiler-Specific
+###
+
+# Compiles $(1) to object file $(2)
+# Usage <C source file, Output file>
+ifeq ($(M_COMPILER),gcc)
+    define fn_c_to_o
+        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) -c -o $(2) $(1)
+    endef
+else
+ifeq ($(M_COMPILER),msvc)
+    define fn_c_to_o
+        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) /c /Fo:$(2) $(1)
+    endef
+endif
+endif
+
+# Links $(1) to executable file $(2)
+# Usage <Object file(s), Output file>
+ifeq ($(M_COMPILER),gcc)
+    define fn_o_to_out
+        $(M_LD) -o $(2) $(1) $(M_LDFLAGS)
+    endef
+else
+ifeq ($(M_COMPILER),msvc)
+    define fn_o_to_out
+        $(M_LD) $(M_LDFLAGS) /OUT:$(2) $(1)
+    endef
+endif
+endif
+        
 ####
 #### 3. Targets
 ####
@@ -119,10 +179,10 @@ endif
 build: $(M_BUILD_DIR)/$(M_TARGET)$(M_E)
 
 $(M_BUILD_DIR)/$(M_TARGET)$(M_E): $(M_BUILD_DIR)/ghdisk.fat$(M_O) | build_dir
-	gcc $(M_CFLAGS) $(M_ACFLAGS) -o $@ $^
+	$(call fn_o_to_out,$^,$@)
 
 $(M_BUILD_DIR)/ghdisk.fat$(M_O): $(C_SRC_DIR)/ghdisk.fat.c | build_dir
-	gcc $(M_CFLAGS) $(M_ACFLAGS) -c -o $@ $^
+	$(call fn_c_to_o,$^,$@)
 
 build_dir:
 	$(call fn_fmkdir,$(M_BUILD_DIR))
