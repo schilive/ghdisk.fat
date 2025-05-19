@@ -82,8 +82,6 @@ ifeq ($(M_COMPILER),msvc)
 endif
 endif
 
-M_ACFLAGS ?=
-
 ###
 ### 1.3. Etc.
 ###
