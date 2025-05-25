@@ -21,14 +21,27 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This declares manually the preprocessor objects needed for all supported
+ * encodings.
+ */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#ifndef STR_ENC_H
+#define STR_ENC_H
 
-int main()
-{
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
-}
+#include <stddef.h>
+
+/* The following preprocessor macros have a unique number, used to identify if
+ * two string encodings are equal, when handling encoding roles.
+ */
+#define STR_ENC_V_c             0
+#define STR_ENC_V_usascii       1
+#define STR_ENC_V_w             2
+
+/* The following macros expand to the maximum size, in bytes, of a character in
+ * the given encoding.
+ */
+#define STR_SZMAX_c             sizeof(char)
+#define STR_SZMAX_usascii       1
+#define STR_SZMAX_w             sizeof(wchar_t)
+
+#endif /* STR_ENC_H */

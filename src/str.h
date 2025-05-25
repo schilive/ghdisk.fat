@@ -21,14 +21,17 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This declares the user-level interface for the string and encoding system. */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#ifndef STR_H
+#define STR_H
 
-int main()
-{
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
-}
+#include "str/common.h"
+
+#ifdef _G_ENC_TRN_W
+#       define STR_TRN(x)      str_make(L##x, STR_ENC(TRN), STR_SZ(TRN)(L##x))
+#else
+#       define STR_TRN(x)      str_make(x, STR_ENC(TRN), STR_SZ(TRN)(x))
+#endif
+
+#endif /* STR_H */

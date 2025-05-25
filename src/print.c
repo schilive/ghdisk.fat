@@ -21,14 +21,33 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This implements 'print.h'. */
 
 #include <stdio.h>
-#include "str.h"
 #include "print.h"
+#include "sysstr.h"
 
-int main()
+void print(struct str s)
 {
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
+        if (s.encoding == STR_ENC(FIL)) {
+                printf("%.*s", (int)s.size, (char*)s.string);
+                return;
+        }
+
+        while (s.size != 0) {
+                char buf[STR_SZMAX(FIL)];
+                enum str_conv_error err;
+                size_t off;
+                size_t bufSz;
+                err = str_conv(s, STR_ENC(FIL), buf, &off, &bufSz);
+                /* assert(bufSz <= s.size) */
+                if (err != STR_CONV_ERR_OK) {
+                        struct str unk = STR_UNKCH(FIL);
+                        printf("%.*s", (int)unk.size, (char*)unk.string);
+                } else {
+                        printf("%.*s", (int)bufSz, buf);
+                }
+                s.string = (char*)(s.string) + off;
+                s.size -= off;
+        }
 }

@@ -21,14 +21,21 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This declares the objects to support the US-ASCII encoding. */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#include "../common.h"
+#include <stddef.h>
 
-int main()
+struct str str_unkch_usascii = {
+        "\x3F",
+        STR_ENC_usascii,
+        sizeof(char)
+};
+
+size_t str_sz_usascii(void *s)
 {
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
+        size_t r;
+        for (r = 0; ((char*)s)[r] != 0; r++);
+        return r;
 }
+

@@ -21,14 +21,21 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This declares the system-level interface for the string and encoding system.
+ */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#ifndef SSYSTR_H
+#define SSYSTR_H
 
-int main()
-{
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
-}
+#include <stddef.h>
+#include "str/common.h"
+
+enum str_conv_error str_conv(
+        struct str s,
+        enum str_encoding toE,
+        void *r,
+        size_t *off,
+        size_t *sz
+);
+
+#endif /* SSYSTR_H */

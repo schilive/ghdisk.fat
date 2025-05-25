@@ -85,7 +85,40 @@ endif
 endif
 
 ###
-### 1.3. Etc.
+### 1.3. String and Encoding System
+###
+
+M_ENC_TRN ?= c
+M_ENC_NRM ?= c
+M_ENC_FIL ?= c
+
+M_ENC_TRN_W ?=
+
+ifeq ($(M_ENC_SRCS),)
+    M_ENC_SRCS += $(M_ENC_TRN)
+    M_ENC_SRCS += $(M_ENC_FIL)
+
+    ifneq ($(M_ENC_TRN),$(M_ENC_FIL))
+        ifeq ($(M_ENC_TRN),$(M_ENC_NRM))
+            M_ENC_SRCS += $(M_ENC_TRN)-$(M_ENC_FIL)
+        else
+            M_ENC_SRCS += $(M_ENC_TRN)-$(M_ENC_NRM)
+            ifneq ($(M_ENC_NRM),$(M_ENC_FIL))
+                M_ENC_SRCS += $(M_ENC_NRM)-$(M_ENC_FIL)
+            endif
+        endif
+    endif
+endif
+
+M_CFLAGS += $(call fn_-D,_G_ENC_TRN,$(M_ENC_TRN))
+M_CFLAGS += $(call fn_-D,_G_ENC_NRM,$(M_ENC_NRM))
+M_CFLAGS += $(call fn_-D,_G_ENC_FIL,$(M_ENC_FIL))
+ifneq ($(M_ENC_TRN_W),)
+    M_CFLAGS += $(call fn_-D,_G_ENC_TRN_W,)
+endif
+
+###
+### 1.4. Etc.
 ###
 
 M_TARGET ?= ghdisk.fat
@@ -171,21 +204,84 @@ ifeq ($(M_COMPILER),msvc)
     endef
 endif
 endif
+
+# Expands to the compiler-specific flag that defines the macro $(1) with the
+# value $(2). Do pay attention to not include <=>, <'> or <"> in $(1).
+#
+# Usage: <Macro name, macro value>
+ifeq ($(M_COMPILER),gcc)
+    define fn_-D
+-D "$(1)=$(2)"
+    endef
+else
+ifeq ($(M_COMPILER),msvc)
+    define fn_-D
+/D "$(1)=$(2)"
+    endef
+endif
+endif
+
+
+###
+### 2.3. Target
+###
+
+# Create rule for $(word 1, $(1))$(M_O) to compile $(word 1, $(1)) as a C source
+# code. All members of the list after the first element, are the requirements.
+#
+# Usage: <{C source file} [Requirements]...>
+define fn_rule_c
+$(M_BUILD_DIR)/$(patsubst %.c,%$(M_O),$(word 1,$(1))): $(foreach i,$(1),$(C_SRC_DIR)$(i)) | build_dir
+	$(call fn_c_to_o,$$(word 1,$$^),$$@)
+endef
+
+# Creates a double-colon rule of name 'build_dir' to create the directory $(1).
+# Usage: <dir>
+define fn_rule_buildDir
+build_dir::
+	$(call fn_fmkdir,$(1))
+endef
         
 ####
 #### 3. Targets
 ####
 
+V_SRCS1 =\
+	ghdisk.fat.c*\
+		*str.h*\
+		*print.h\
+	str.c*\
+		*str.h*\
+		*sysstr.h*\
+		*str/common.h*\
+		*str/enc.h*\
+		*str/conf.h\
+	print.c*\
+		*print.h*\
+		*sysstr.h
+V_SRCS = $(subst * *,*,$(V_SRCS1))
+V_SRCS += $(foreach i,$(M_ENC_SRCS),str/enc/$(i).c)
+
+V_TARGET_REQS = $(foreach i,$(V_SRCS),$(M_BUILD_DIR)/$(patsubst %.c,%$(M_O),$(word 1,$(subst *, ,$(i)))))
+V_DIRS1 = $(foreach i,$(V_SRCS),$(dir $(word 1,$(subst *, ,$(i)))))
+V_DIRS2 = $(foreach i,$(V_DIRS1),$(M_BUILD_DIR)/$(i))
+ifeq ($(V_DIRS2),)
+    V_DIRS = $(M_BUILD_DIR)
+else
+    V_DIRS = $(sort $(V_DIRS2))
+endif
+$(info A: $(V_DIRS1))
+$(info B: $(V_DIRS2))
+$(info C: $(V_DIRS))
+
 build: $(M_BUILD_DIR)/$(M_TARGET)$(M_E)
 
-$(M_BUILD_DIR)/$(M_TARGET)$(M_E): $(M_BUILD_DIR)/ghdisk.fat$(M_O) | build_dir
+$(M_BUILD_DIR)/$(M_TARGET)$(M_E): $(V_TARGET_REQS) | build_dir
 	$(call fn_o_to_out,$^,$@)
 
-$(M_BUILD_DIR)/ghdisk.fat$(M_O): $(C_SRC_DIR)/ghdisk.fat.c | build_dir
-	$(call fn_c_to_o,$^,$@)
+$(foreach i,$(V_SRCS),$(eval $(call fn_rule_c,$(subst *, ,$(i)))))
 
-build_dir:
-	$(call fn_fmkdir,$(M_BUILD_DIR))
+$(foreach i,$(V_DIRS),$(eval $(call fn_rule_buildDir,$(i))))
 
 clean:
 	$(call fn_rmdir,$(M_BUILD_DIR))
