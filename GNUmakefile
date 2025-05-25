@@ -7,6 +7,8 @@
 #
 #  All macro starts with the prefix 'fn_'.
 #
+# !!!WARNINGS!!! Only tabs where strictly necessary, otherwise use 4 spaces for
+# indentation.
 
 ####
 #### 1. Settings
