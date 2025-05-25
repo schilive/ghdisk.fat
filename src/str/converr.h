@@ -21,14 +21,16 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This declares the possible errors for encoding conversion functions. */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#ifndef STR_CONVERR_H
+#define STR_CONVERR_H
 
-int main()
-{
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
-}
+enum str_conv_error {
+        STR_CONV_ERR_OK,
+        STR_CONV_ERR_BAD,
+        STR_CONV_ERR_INCOMP,
+        STR_CONV_ERR_NOEQ
+};
+
+#endif /* STR_CONVERR_H */

@@ -21,14 +21,33 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This declares the user-level interface of the string and encoding system. */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#ifndef STR_H
+#define STR_H
 
-int main()
+#include "str/str.h"
+#include "str/strenc.h"
+#include "str/macros.h"
+
+static struct str str_make(void *s, enum str_encoding e, size_t sz)
 {
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
+        struct str r;
+        r.buffer.buffer = s;
+        r.encoding = e;
+        r.buffer.size = sz;
+        return r;
 }
+
+/* This is what is used to create translation messages in the project.
+ *
+ * The input of the macro 'STR_TRN()' should be a literal string, neither a
+ * variable nor a wide string.
+ */
+#ifdef _G_ENC_TRN_W
+#       define STR_TRN(x) str_make(L##x, STR_ENC(TRN), STR_SZ(TRN)(L##x))
+#else
+#       define STR_TRN(x) str_make(x, STR_ENC(TRN), STR_SZ(TRN)(x))
+#endif
+
+#endif /* STR_H */

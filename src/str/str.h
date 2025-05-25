@@ -21,14 +21,19 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This declares the structure 'struct str'. */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#ifndef STR_STR_H
+#define STR_STR_H
 
-int main()
-{
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
-}
+#include "buffer.h"
+#include "strenc.h"
+
+struct str {
+        /* The buffer where the string and its size are stored. */
+        struct str_buffer buffer;
+        /* The encoding of the buffer/string. */
+        enum str_encoding encoding;
+};
+
+#endif /* STR_STR_H */

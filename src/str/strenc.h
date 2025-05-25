@@ -21,14 +21,24 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This defines the enumerator 'enum str_encoding'. */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#ifndef STR_STRENC_H
+#define STR_STRENC_H
 
-int main()
-{
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
-}
+#include "macros.h"
+
+/* We do all this because we cannot give two enumerators with the same name, so
+ * we need some preprocessor trickery.
+ */
+enum str_encoding {
+        STR_ENC(TRN)
+#if STR_ID(NRM) != STR_ID(TRN)
+        ,STR_ENC(NRM)
+#endif
+#if STR_ID(FIL) != STR_ID(TRN) && STR_ID(FIL) != STR_ID(NRM)
+        ,STR_ENC(FIL)
+#endif
+};
+
+#endif /* STR_STRENC_H */

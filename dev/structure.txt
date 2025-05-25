@@ -4,4 +4,63 @@ understand after reading all developer documentation.
 
 ## File Structure
 - 'src/': source code.
+        - 'str': string and encoding system
+                - 'enc': the encoding-specific object implementations.
 - 'dev/': developer-oriented documentation.
+
+## String and Encoding System
+### Concepts
+First, two things are declared.
+        - The encoding-specific objects, including preprocessor macros and
+          conversion functions between encodings, are _declared_.
+        - The encoding of the "roles" are defined, also using a configuration
+          global preprocessor macro.
+
+They are defined in such a way that if the role's encoding is configured to be
+X and the Y object is desired, then with preprocessor macros trickery, the
+object Y for the encoding X may be referenced. The roles are the possible
+origins of the strings. Currently they are the following.
+        - [TRN] Translatable Strings: Messages which are able to be
+          translated, like diagnostic messages.
+        - [NRM] Normal encoding: in conversion of encodings, the character is
+          translated first to the normal encoding, then to the target
+          encoding. This may actually not be used if possible.
+        - [FIL] Output File Encoding: The output encoding for the output when
+          the output is not the console, but a file. If the system is unable
+          to differentiate between output to a file and console, then solely
+          FIL is chosen.
+This system allows the encoding configuration to be that of configuring the
+encoding for each role.
+
+In the end, two interfaces are made: the user-level interface and the
+system-level interface. The user-level interface is meant to be used
+generally. The system-level interface is not meant to be used
+except in conditions when dealing with encodings is inevitable.
+
+### C String (C) and Wide String (W) Encodings
+The ISO C89 standard guarantees that strings can have the characters of the
+basic execution character set, as it defines it. It provides a always to
+define these strings and their characters. Although we cannot know simply by
+code which encoding the C strings and wide strings use, we still can support
+them in string operations because of this ability to define their characters.
+
+The usefulness of this support is that some C library functions specifically
+use the C string encoding. Regarding wide strings, the MinGW/MSVC compiler(s)
+implement wide strings with the UTF-16LE encodings, which is very useful.
+
+For short, we call internally the C string encoding "c" and the wide string
+encoding "w".
+
+### Files in 'src/str/enc/'
+There are 3 types of files in this directory, given two encodings, x and y.
+        - 'x_sz.c': the source file that implements the 'str_sz_x()' function
+          for the encoding 'x'.
+        - 'x_unkch.c': the source file that implements the 'str_unkch_x'
+          object for the encoding 'x'.
+        - 'x_conv_y.c': the source file that implements the 'str_conv_x_y()'
+          functions for the encodings 'x' and 'y'.
+
+### Limitations
+Currently, the system, really, only expects encodings where characters are of
+fixed size. Characters of the Unicode type, could not be supported correctly,
+except for lazy implementations.

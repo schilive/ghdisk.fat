@@ -1,5 +1,19 @@
 # How to Build the Project
 ## Introduction
+The build system is, quite, complex so it can be OS-agnostic and
+compiler-agnostic. This is probably not ideal for most projects, but this
+project wants to support POSIX systems, Windows NT, Windows 16-bits (3, 95,
+ME), MS-DOS and even MS-DOS 1.x. Although not many host OSes are supported, so
+this many target OSes may be, many compilers have to be supported. Further, it
+sacrifices its own internal complexity so whoever wants to build it ('the
+builder'), can build it easier and in a more intuitive way. This also means
+somethings are done automatically, although they can be deativated.
+
+An interesting feature of the build system is a list of dependencies for all C
+source files and header files. This means dependencies are computed
+automatically by GNU Make, though in quite a complex manner. This is to avoid
+the _necessity_ of using a compiler-specific tool.
+
 Requirements:
         - Windows (>= Windows 2000) or POSIX-compatible OS.
         - GNU Make; extensions are used.
@@ -27,6 +41,16 @@ There are two build Makefile targets.
 All build options start with "M_", and are regular Makefile options. So, they
 can be set through the Make tool, such as "make M_TARGET=target", or through
 an environmental variable.
+
+### General
+- 'M_AUTO = 1: if set, the options which may add something automatically
+  effectively, do it. If unset, they do not. The options with this behaviour
+  are the following.
+        - M_ENC_TRN
+        - M_ENC_NRM
+        - M_ENC_FIL
+        - M_ENC_TRN_W
+        - M_ENC_SRCS
 
 ### File Options
 - 'M_TARGET = ghdisk.fat': the name of the output binary executable, not
@@ -63,3 +87,74 @@ an environmental variable.
   This option is only manually defined, and so is empty by default.
 - 'M_LDFLAGS': the options added to every issue of M_LD. It is only manually
   defined. Hence, no 'M_ALDFLAGS' are needed.
+
+### Encoding Options
+- 'M_ENC_TRN = c': the internal name of the encoding for the role 'TRN', which
+  are the translatable strings. If 'M_AUTO' is set, the globally-defined
+  preprocessor macro '_G_ENC_TRN' will be set to the value of this option. If
+  'M_AUTO' is set and 'M_ENC_SRCS' is empty, the strictly necessary source
+  code file(s) will be added to 'M_ENC_SRCS' considering the value of the
+  other role options. If 'M_AUTO' is set and 'M_ENC_TRN = w', then
+  'M_ENC_TRN_W' is set, unless already set.
+- 'M_ENC_NRM = usascii': the internal name of the encoding for the role 'NRM',
+  which is the normal encoding, used as "pivot" when converting. If 'M_AUTO'
+  is set, the globally-defined preprocessor macro '_G_ENC_NRM' will be set to
+  the value of this option. If 'M_AUTO' is set and 'M_ENC_SRCS' is empty, the
+  strictly necessary source code file(s) will be added to 'M_ENC_SRCS'
+  considering the value of the other role options.
+- 'M_ENC_FIL = c': the internal name of the encoding for the role 'FIL', which
+  the encoding of the output when outputting to a file or in STDC. If 'M_AUTO'
+  is set, the globally-defined preprocessor macro '_G_ENC_FIL' will be set to
+  the value of this option. If 'M_AUTO' is set and 'M_ENC_SRCS' is empty, the
+  strictly necessary source code file(s) will be added to 'M_ENC_SRCS'
+  considering the value of the other role options.
+- 'M_ENC_TRN_W': if set, the string literal of the strings of the role 'TRN',
+  the translatable strings, will have 'L' added to their beginning. This makes
+  them a wide string.
+- 'M_ENC_SRCS: if set, it includes the names of the files from the directory
+  which has the files which implement the encoding-specific objects. The names
+  have neither file extension suffixed nor directory prefixed; for example,
+  "c_unkch w_conv_c". If unset and 'M_AUTO' is set, the following algorithm
+  applies.
+        - The file '$(M_ENC_TRN)_sz' is added.
+        - The file '$(M_ENC_FIL)_unkch' is added.
+        - If '$(M_ENC_TNR) == $(M_ENC_FIL)', the algorithm stops here,
+          otherwise it continue forwards.
+        - If '$(M_ENC_TRN) == $(M_ENC_NRM)', the file
+          '$(M_ENC_TRN)_conv_$(M_ENC_FIL)' is added and the algorithm stops
+          here, otherwise it continues forwards.
+        - The file '$(M_ENC_TRN)_conv_$(M_ENC_NRM)' is added.
+        - If '$(M_ENC_NRM) = $(M_ENC_FIL)', the algorithm stops here,
+          otherwise it continue forwards.
+        - The file '$(M_ENC_NRM)_conv_$(M_ENC_FIL)' is added.
+        - The algorithm stops here.
+
+## Globally-Defined Configuration Preprocessor Macros
+All preprocessor macros used for configuration are defined globally, and have
+the name prefixed '_G_'. They _never_ need to be defined, and always have an
+effective default value. They are the following.
+        - '_G_ENC_TRN': the internal name of the encoding of the role 'TRN',
+          which are translatable strings.
+        - '_G_ENC_NRM': the internal name of the encoding of the role 'NRM',
+          which is the normal encodings.
+        - '_G_ENC_FIL': the internal name of the encoding of the role 'FIL',
+          which is the output encoding when redirecting to file, or always for
+          STDC.
+        - '_G_ENC_TRN_W': if defined, adds 'L' to the beginning of the string
+          literals of the translatable strings, which makes them wide string
+          literals.
+
+## List of Supported Encodings
+The only currently supported encoding as the normal encoding is US-ASCII
+(internal name 'usascii'). For the other roles, the following encodings are
+supported.
+
+- C String ('c')
+        - Only allows the characters in the basic execution character set in
+          the ISO standard.
+- Wide String ('w')
+        - Only allows the characters in the basic execution character set in
+          the ISO standard.
+- US-ASCII ('usascii')
+        - Only allows byte-sized characters whose value are between 0x00 and
+          0x7F.

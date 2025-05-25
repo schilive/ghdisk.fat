@@ -21,14 +21,14 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This declares a simple print function that prints to standard error */
 
-#include <stdio.h>
+#ifndef PRINT_H
+#define PRINT_H
+
 #include "str.h"
-#include "print.h"
 
-int main()
-{
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
-}
+/* Printst the string in 's'. */
+void print(struct str s);
+
+#endif /* PRINT_H */

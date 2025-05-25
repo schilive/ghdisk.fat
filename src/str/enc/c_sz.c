@@ -21,14 +21,15 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This implements the function 'str_sz_x' for the encoding C String (C). */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#include "../enc.h"
+#include <stddef.h>
 
-int main()
+size_t str_sz_c(void *s)
 {
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
+        size_t i;
+        for (i = 0; ((char*)s)[i] != '\0'; i++);
+        /* I know that 'sizeof(char)' = 1 by the standard, but whatever. */
+        return i * sizeof(char);
 }

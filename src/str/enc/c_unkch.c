@@ -21,14 +21,11 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This implements the structure 'str_unkch_x' for the encoding C String (C). */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#include "../enc.h"
 
-int main()
-{
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
-}
+struct str_buffer str_unkch_c = {
+        "?",
+        sizeof(char)
+};

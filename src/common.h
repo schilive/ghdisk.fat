@@ -21,14 +21,21 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This defines general stuff that being put here is cleaner than put in their
+ * own file(s).
+ */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#ifndef COMMON_H
+#define COMMON_H
 
-int main()
-{
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
-}
+/* This macro concatenates the inputs in their given order. */
+#define PASTE2(a, b)                    PASTE2_INNER(a, b)
+#define PASTE2_INNER(a, b)              a##b
+/* This macro concatenates the inputs in their given order. */
+#define PASTE3(a, b, c)                 PASTE3_INNER(a, b, c)
+#define PASTE3_INNER(a, b, c)           a##b##c
+/* This macro concatenates the inputs in their given order. */
+#define PASTE4(a, b, c, d)              PASTE4_INNER(a, b, c, d)
+#define PASTE4_INNER(a, b, c, d)        a##b##c##d
+
+#endif /* COMMON_H */

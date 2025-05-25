@@ -21,14 +21,16 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This is the main function for the utility 'ghdisk.fat'. */
+/* This implements the function 'str_sz_x' for the encoding US-ASCII. */
 
-#include <stdio.h>
-#include "str.h"
-#include "print.h"
+#include "../enc.h"
+#include <stddef.h>
 
-int main()
+#define USASCII_NUL     0
+
+size_t str_sz_usascii(void *s)
 {
-        print(STR_TRN("Hello, World!\n"));
-        return 0;
+        size_t i;
+        for (i = 0; ((unsigned char*)s)[i] != USASCII_NUL; i++);
+        return i;
 }

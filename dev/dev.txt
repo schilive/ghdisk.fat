@@ -13,3 +13,26 @@ that way.
           comment is also assumed.
         - File-, structure- or macro-specific interface comment.
         - File-, structure- or macro-specific implementation comment.
+
+## How to Add an Encoding
+To add full support for the encoding X, with N as the normal encoding, do the
+following.
+
+1. Decide an internal name which has only letters and numbers, 'x'.
+2. On 'encs.h', declare an object for every object type presented in the file,
+using 'x' as the internal name. The comments there should help. In relation to
+the declaration of the conversion functions, add two functions: one that
+converts from 'x' to N, and vice-versa.
+3. Implements all these implementable objects declared in the directory where
+encoding-specific objects are defined. This should be informed by
+'dev/structure.txt'. When implementing the conversion functions, note to
+implement the NUL character.
+
+## Important Warnings
+- Filenames cannot contain "*", because of a specific way the GNUmakefile is
+  used.
+- Filenames cannot contain spaces or space-like characters, such as tab. This
+  is because GNUmakefile may not deal well with them.
+- Every change in the dependencies of include files in the projects, must be
+  followed by an update of the requirements graph in GNUmakefile. This kind of
+  sucks, but its result is worth it, I thunk. Even if not: THIS IS MY PROJECT!
