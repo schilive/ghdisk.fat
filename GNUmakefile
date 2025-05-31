@@ -95,16 +95,16 @@ M_ENC_FIL ?= c
 M_ENC_TRN_W ?=
 
 ifeq ($(M_ENC_SRCS),)
-    M_ENC_SRCS += $(M_ENC_TRN)
-    M_ENC_SRCS += $(M_ENC_FIL)
+    M_ENC_SRCS += $(M_ENC_TRN)_sz
+    M_ENC_SRCS += $(M_ENC_FIL)_unkch
 
     ifneq ($(M_ENC_TRN),$(M_ENC_FIL))
         ifeq ($(M_ENC_TRN),$(M_ENC_NRM))
-            M_ENC_SRCS += $(M_ENC_TRN)-$(M_ENC_FIL)
+            M_ENC_SRCS += $(M_ENC_TRN)_conv_$(M_ENC_FIL)
         else
-            M_ENC_SRCS += $(M_ENC_TRN)-$(M_ENC_NRM)
+            M_ENC_SRCS += $(M_ENC_TRN)_conv_$(M_ENC_NRM)
             ifneq ($(M_ENC_NRM),$(M_ENC_FIL))
-                M_ENC_SRCS += $(M_ENC_NRM)-$(M_ENC_FIL)
+                M_ENC_SRCS += $(M_ENC_NRM)_conv_$(M_ENC_FIL)
             endif
         endif
     endif
@@ -251,11 +251,10 @@ V_SRCS1 =\
 		*str.h*\
 		*print.h\
 	str.c*\
-		*str.h*\
 		*sysstr.h*\
-		*str/common.h*\
-		*str/enc.h*\
-		*str/conf.h\
+		*str/macros.h*\
+		*str/buffer.h*\
+		*str/converr.h\
 	print.c*\
 		*print.h*\
 		*sysstr.h

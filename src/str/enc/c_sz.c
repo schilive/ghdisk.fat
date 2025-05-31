@@ -21,20 +21,15 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This declares the objects to support the Wide String (w) encoding. */
+/* This implements the function 'str_sz_x' for the encoding C String (C). */
 
-#include "../common.h"
+#include "../enc.h"
 #include <stddef.h>
 
-struct str str_unkch_w = {
-        L"?",
-        STR_ENC_w,
-        sizeof(wchar_t)
-};
-
-size_t str_sz_w(void *s)
+size_t str_sz_c(void *s)
 {
         size_t i;
-        for (i = 0; ((wchar_t*)s)[i] != L'\0'; i++);
-        return i * sizeof(wchar_t);
+        for (i = 0; ((char*)s)[i] != '\0'; i++);
+        /* I know that 'sizeof(char)' = 1 by the standard, but whatever. */
+        return i * sizeof(char);
 }

@@ -21,21 +21,23 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This declares the system-level interface for the string and encoding system.
+/* This declares the system-level interface of the string and encoding system.
  */
 
-#ifndef SSYSTR_H
-#define SSYSTR_H
+#ifndef SYSSTR_H
+#define SYSSTR_H
 
 #include <stddef.h>
-#include "str/common.h"
+#include "str/converr.h"
+#include "str/str.h"
+#include "str/strenc.h"
+#include "str/buffer.h"
 
 enum str_conv_error str_conv(
-        struct str s,
+        struct str in,
         enum str_encoding toE,
-        void *r,
-        size_t *off,
-        size_t *sz
+        struct str_buffer *out,
+        size_t *off
 );
 
-#endif /* SSYSTR_H */
+#endif /* SYSSTR_H */

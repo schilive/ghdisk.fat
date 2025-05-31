@@ -21,20 +21,11 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This declares the objects to support the C encoding. */
+/* This implements the structure 'str_unkch_x' for the encoding C String (C). */
 
-#include "../common.h"
-#include <stddef.h>
+#include "../enc.h"
 
-struct str str_unkch_c = {
+struct str_buffer str_unkch_c = {
         "?",
-        STR_ENC_c,
         sizeof(char)
 };
-
-size_t str_sz_c(void *s)
-{
-        size_t i;
-        for (i = 0; ((char*)s)[i] != '\0'; i++);
-        return i * sizeof(char);
-}

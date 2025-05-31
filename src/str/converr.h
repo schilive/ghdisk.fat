@@ -21,21 +21,16 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This declares the objects to support the US-ASCII encoding. */
+/* This declares the possible errors for encoding conversion functions. */
 
-#include "../common.h"
-#include <stddef.h>
+#ifndef STR_CONVERR_H
+#define STR_CONVERR_H
 
-struct str str_unkch_usascii = {
-        "\x3F",
-        STR_ENC_usascii,
-        sizeof(char)
+enum str_conv_error {
+        STR_CONV_ERR_OK,
+        STR_CONV_ERR_BAD,
+        STR_CONV_ERR_INCOMP,
+        STR_CONV_ERR_NOEQ
 };
 
-size_t str_sz_usascii(void *s)
-{
-        size_t r;
-        for (r = 0; ((char*)s)[r] != 0; r++);
-        return r;
-}
-
+#endif /* STR_CONVERR_H */

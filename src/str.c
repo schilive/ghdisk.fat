@@ -21,60 +21,55 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This implements the user-level and system-level interface. */
+/* This implements the implementable objects which are not encoding-specific of
+ * the user-level and system-level interface of the string and encoding system.
+ */
 
-#include "str.h"
 #include "sysstr.h"
-#include "str/common.h"
-
-struct str str_make(void *s, enum str_encoding e, size_t sz)
-{
-        struct str r;
-        r.string = s;
-        r.encoding = e;
-        r.size = sz;
-        return r;
-}
+#include <stddef.h>
+#include "str/macros.h"
+#include "str/buffer.h"
+#include "str/converr.h"
 
 enum str_conv_error str_conv(
-        struct str s,
+        struct str in,
         enum str_encoding toE,
-        void *r,
-        size_t *off,
-        size_t *sz
+        struct str_buffer *out,
+        size_t *off
 )
 {
-        /* assert(s.encoding != toE) */
-        /* assert(s.encoding == STR_ENC(TRN)) */
-        /* assert(toE == STR_ENC(FIL)) */
-#if STR_ENC_V(TRN) == STR_ENC_V(FIL)
+        /* assert(in.encoding != toE) */
+        /* assert(in.encoding == STR_ENC(TRN) */
+        /* assert(toE == STR_ENC(FIL) */
+#if STR_ID(TRN) == STR_ID(FIL)
+        /* We only add this so no compilation error happens. */
         /* assert(0) */
-        return 0;
+        return STR_CONV_ERR_OK;
 #else
-#if STR_ENC_V(TRN) == STR_ENC_V(NRM) && STR_ENC_V(NRM) != STR_ENC_V(FIL)
-        return STR_CONV(TRN, FIL)(s, r, off, sz);
-#endif
-#if STR_ENC_V(TRN) != STR_ENC_V(NRM) && STR_ENC_V(NRM) == STR_ENC_V(FIL)
-        return STR_CONV(TRN, NRM)(s, r, off, sz);
-#endif
-#if STR_ENC_V(TRN) != STR_ENC_V(NRM) && STR_ENC_V(NRM) != STR_ENC_V(FIL)
-        struct str nrm;
+#       if STR_ID(TRN) == STR_ID(NRM) && STR_ID(NRM) != STR_ID(FIL)
+        return STR_CONV(NRM, FIL)(in.buffer, out, off);
+#       endif
+#       if STR_ID(TRN) != STR_ID(NRM) && STR_ID(NRM) == STR_ID(FIL)
+        return STR_CONV(TRN, NRM)(in.buffer, out, off);
+#       endif
+#       if STR_ID(TRN) != STR_ID(NRM) && STR_ID(NRM) != STR_ID(FIL)
         char nrmBuf[STR_SZMAX(NRM)];
+        struct str_buffer nrm;
         enum str_conv_error err;
         size_t nrmOff;
-        nrm.string = nrmBuf;
-        err = STR_CONV(TRN, NRM)(s, nrm.string, off, &(nrm.size));
+        nrm.buffer = nrmBuf;
+        err = STR_CONV(TRN, NRM)(in.buffer, &nrm, off);
         if (err != STR_CONV_ERR_OK)
                 return err;
         /* assert(nrm.size <= STR_SZMAX(NRM) */
+        /* assert(off <= in.buffer.size) */
 
-        nrm.encoding = STR_ENC(NRM);
-        err = STR_CONV(NRM, FIL)(nrm, r, &nrmOff, sz);
+        err = STR_CONV(NRM, FIL)(nrm, out, &nrmOff);
         if (err != STR_CONV_ERR_OK)
                 return err;
+        /* assert(out->size <= STR_SZMAX(FIL)) */
         /* assert(nrmOff == nrm.size) */
-        /* assert(sz <= STR_SZMAX(FIL)) */
         return err;
-#endif
+#       endif
 #endif
 }

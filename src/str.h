@@ -21,17 +21,31 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This declares the user-level interface for the string and encoding system. */
+/* This declares the user-level interface of the string and encoding system. */
 
 #ifndef STR_H
 #define STR_H
 
-#include "str/common.h"
+#include "str/str.h"
+#include "str/strenc.h"
+#include "str/macros.h"
 
+static struct str str_make(void *s, enum str_encoding e, size_t sz)
+{
+        struct str r;
+        r.buffer.buffer = s;
+        r.encoding = e;
+        r.buffer.size = sz;
+        return r;
+}
+
+/* The input of the macro 'STR_TRN()' should be a literal string, neither a
+ * variable nor a wide string.
+ */
 #ifdef _G_ENC_TRN_W
-#       define STR_TRN(x)      str_make(L##x, STR_ENC(TRN), STR_SZ(TRN)(L##x))
+#       define STR_TRN(x) str_make(L##x, STR_ENC(TRN), STR_SZ(TRN)(L##x))
 #else
-#       define STR_TRN(x)      str_make(x, STR_ENC(TRN), STR_SZ(TRN)(x))
+#       define STR_TRN(x) str_make(x, STR_ENC(TRN), STR_SZ(TRN)(x))
 #endif
 
 #endif /* STR_H */

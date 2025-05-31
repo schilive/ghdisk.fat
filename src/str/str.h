@@ -21,33 +21,17 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This configures the encodings roles.
- *
- * The preprocessor macro STR_x_ENC expands to the internal name of the encoding
- * of the role 'x'.
- */
+/* This declares the structure 'struct str'. */
 
-#ifndef STR_CONF_H
-#define STR_CONF_H
+#ifndef STR_STR_H
+#define STR_STR_H
 
-/* We set the encoding 'c' as the default, because it is the most neutral
- * option. We chose a default so the program _can_ be compiled without any
- * compilation settings.
- */
-#ifdef _G_ENC_TRN
-#       define STR_TRN_ENC      _G_ENC_TRN
-#else
-#       define STR_TRN_ENC      c
-#endif
-#ifdef _G_ENC_NRM
-#       define STR_NRM_ENC      _G_ENC_NRM
-#else
-#       define STR_NRM_ENC      c
-#endif
-#ifdef _G_ENC_FIL
-#       define STR_FIL_ENC      _G_ENC_FIL
-#else
-#       define STR_FIL_ENC      c
-#endif
+#include "buffer.h"
+#include "strenc.h"
 
-#endif /* STR_CONF_H */
+struct str {
+        struct str_buffer buffer;
+        enum str_encoding encoding;
+};
+
+#endif /* STR_STR_H */

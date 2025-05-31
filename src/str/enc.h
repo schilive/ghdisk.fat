@@ -21,27 +21,81 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This declares manually the preprocessor objects needed for all supported
- * encodings.
+/* This declares the preprocessor macros and objects for each supported
+ * encoding. This file is manually edited.
+ *
+ * Note that the preprocessor macros are defined here, and so may be used as
+ * long as this file is included. However, the other objects are simply
+ * declared, and so their implementation must be compiled. This is because
+ * preprocessor macros and declarations do not increase the space in the end,
+ * but implementations do.
  */
 
 #ifndef STR_ENC_H
 #define STR_ENC_H
 
 #include <stddef.h>
+#include "../common.h"
+#include "buffer.h"
+#include "converr.h"
 
-/* The following preprocessor macros have a unique number, used to identify if
- * two string encodings are equal, when handling encoding roles.
+/* This macro expands to the declaration of a conversion function, from encoding
+ * of internal name 'x' to the encoding of internal name 'y'.
+ *
+ * It is a bit odd to declare this macro here, considering 'macros.h', but
+ * whatever.
  */
-#define STR_ENC_V_c             0
-#define STR_ENC_V_usascii       1
-#define STR_ENC_V_w             2
+#define STR_CONV_DEC(x, y)\
+        enum str_conv_error PASTE4(str_conv_, x, _, y)(\
+                struct str_buffer in,\
+                struct str_buffer *out,\
+                size_t *off\
+        );
 
-/* The following macros expand to the maximum size, in bytes, of a character in
- * the given encoding.
+/* The preprocessor macro STR_ID_x, where 'x' is the internal name of the
+ * encoding, expands to a number unique between all encodings, which uniquely
+ * identifies the encoding 'x'.
+ */
+#define STR_ID_c        0
+#define STR_ID_w        1
+#define STR_ID_usascii  2
+
+/* The preprocessor macro STR_SZMAX_x, where 'x' is the internal name of the
+ * encoding, expands to the maximum size of a character in the encoding 'x'.
+ *
+ * The macros must expands to a literal, so that array may be defined with the
+ * size. This is in accordance to ISO C89, which does not allow VLAs.
  */
 #define STR_SZMAX_c             sizeof(char)
-#define STR_SZMAX_usascii       1
 #define STR_SZMAX_w             sizeof(wchar_t)
+#define STR_SZMAX_usascii       1
+
+/* The object str_unkch_x, where 'x' is the internal name of the encoding, is
+ * the unknown character defined for the encoding 'x'. Some encodings support a
+ * character which means "unknown character", like UNICODE.
+ *
+ * We use 'extern' because, by default, definitions of structures are static
+ * (local). This is in opposition to 
+ */
+extern struct str_buffer str_unkch_c;
+extern struct str_buffer str_unkch_w;
+extern struct str_buffer str_unkch_usascii;
+
+/* The function str_sz_x, where 'x' is the internal name of the encoding, is the
+ * function that returns the size of the NUL-terminated string (in bytes). This
+ * is because different encodings encode the NUL character differently.
+ */
+size_t str_sz_c(void *s);
+size_t str_sz_w(void *s);
+size_t str_sz_usascii(void *s);
+
+/* Here, we declare the available conversion functions. They all assume that the
+ * output buffer (out.buffer) has the size of at least STR_SZMAX_x, where 'x' is
+ * the target encoding.
+ */
+STR_CONV_DEC(c, usascii)
+STR_CONV_DEC(usascii, c)
+STR_CONV_DEC(w, usascii)
+STR_CONV_DEC(usascii, w)
 
 #endif /* STR_ENC_H */

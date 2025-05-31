@@ -24,30 +24,33 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* This implements 'print.h'. */
 
 #include <stdio.h>
+#include <stddef.h>
 #include "print.h"
 #include "sysstr.h"
 
 void print(struct str s)
 {
         if (s.encoding == STR_ENC(FIL)) {
-                printf("%.*s", (int)s.size, (char*)s.string);
+                printf("%.*s", (int)s.buffer.size, (char*)s.buffer.buffer);
                 return;
         }
 
-        while (s.size != 0) {
-                char buf[STR_SZMAX(FIL)];
+        while (s.buffer.size != 0) {
+                char bufArr[STR_SZMAX(FIL)];
                 enum str_conv_error err;
+                struct str_buffer buf;
                 size_t off;
-                size_t bufSz;
-                err = str_conv(s, STR_ENC(FIL), buf, &off, &bufSz);
-                /* assert(bufSz <= s.size) */
+                buf.buffer = bufArr;
+                err = str_conv(s, STR_ENC(FIL), &buf, &off);
+                /* assert(buf.size <= STR_SZMAX(FIL)) */
+                /* assert(off <= buf.size) */
                 if (err != STR_CONV_ERR_OK) {
-                        struct str unk = STR_UNKCH(FIL);
-                        printf("%.*s", (int)unk.size, (char*)unk.string);
+                        struct str_buffer unk = STR_UNKCH(FIL);
+                        printf("%.*s", (int)unk.size, (char*)buf.buffer);
                 } else {
-                        printf("%.*s", (int)bufSz, buf);
+                        printf("%.*s", (int)buf.size, (char*)buf.buffer);
                 }
-                s.string = (char*)(s.string) + off;
-                s.size -= off;
+                s.buffer.buffer = (char*)(s.buffer.buffer) + off;
+                s.buffer.size -= off;
         }
 }

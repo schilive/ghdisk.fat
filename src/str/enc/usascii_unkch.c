@@ -21,33 +21,13 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* This configures the encodings roles.
- *
- * The preprocessor macro STR_x_ENC expands to the internal name of the encoding
- * of the role 'x'.
- */
+/* This implements the structure 'str_unkch_x' for the encoding US-ASCII. */
 
-#ifndef STR_CONF_H
-#define STR_CONF_H
+#include "../enc.h"
 
-/* We set the encoding 'c' as the default, because it is the most neutral
- * option. We chose a default so the program _can_ be compiled without any
- * compilation settings.
- */
-#ifdef _G_ENC_TRN
-#       define STR_TRN_ENC      _G_ENC_TRN
-#else
-#       define STR_TRN_ENC      c
-#endif
-#ifdef _G_ENC_NRM
-#       define STR_NRM_ENC      _G_ENC_NRM
-#else
-#       define STR_NRM_ENC      c
-#endif
-#ifdef _G_ENC_FIL
-#       define STR_FIL_ENC      _G_ENC_FIL
-#else
-#       define STR_FIL_ENC      c
-#endif
+static unsigned char g_question_mark = 0x3F;
 
-#endif /* STR_CONF_H */
+struct str_buffer str_unkch_c = {
+        &g_question_mark,
+        1
+};
