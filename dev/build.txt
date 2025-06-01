@@ -28,6 +28,16 @@ All build options start with "M_", and are regular Makefile options. So, they
 can be set through the Make tool, such as "make M_TARGET=target", or through
 an environmental variable.
 
+### General
+- 'M_AUTO = 1: if set, the options which may add something automatically
+  effectively, do it. If unset, they do not. The options with this behaviour
+  are the following.
+        - M_ENC_TRN
+        - M_ENC_NRM
+        - M_ENC_FIL
+        - M_ENC_TRN_W
+        - M_ENC_SRCS
+
 ### File Options
 - 'M_TARGET = ghdisk.fat': the name of the output binary executable, not
   including the executable extension, if any. The output of the binary
@@ -66,27 +76,31 @@ an environmental variable.
 
 ### Encoding Options
 - 'M_ENC_TRN = c': the internal name of the encoding for the role 'TRN', which
-  are the translatable strings. The globally-defined preprocessor macro
-  '_G_ENC_TRN' will be set to the value of this option. If 'M_ENC_SRCS' is
-  empty, the strictly necessary source code file(s) will be added to
+  are the translatable strings. If 'M_AUTO' is set, the globally-defined
+  preprocessor macro '_G_ENC_TRN' will be set to the value of this option. If
+  'M_AUTO' is set and 'M_ENC_SRCS' is empty, the strictly necessary source
+  code file(s) will be added to 'M_ENC_SRCS' considering the value of the
+  other role options. If 'M_AUTO' is set and 'M_ENC_TRN = w', then
+  'M_ENC_TRN_W' is set, unless already set.
+- 'M_ENC_NRM = c': the internal name of the encoding for the role 'NRM', which
+  is normal encoding. If 'M_AUTO' is set, the globally-defined preprocessor
+  macro '_G_ENC_NRM' will be set to the value of this option. If 'M_AUTO' is
+  set and 'M_ENC_SRCS' is empty, the strictly necessary source code file(s)
+  will be added to 'M_ENC_SRCS' considering the value of the other role
+  options.
+- 'M_ENC_NRM = c': the internal name of the encoding for the role 'NRM', which
+  is normal encoding. If 'M_AUTO' is set, the globally-defined preprocessor macro '_G_ENC_NRM'
+  will be set to the value of this option. If 'M_AUTO' is set and 'M_ENC_SRCS'
+  is empty, the strictly necessary source code file(s) will be added to
   'M_ENC_SRCS' considering the value of the other role options.
-- 'M_ENC_NRM = c': the internal name of the encoding for the role 'NRM', which
-  is normal encoding. The globally-defined preprocessor macro '_G_ENC_NRM'
-  will be set to the value of this option. If 'M_ENC_SRCS' is empty, the
-  strictly necessary source code file(s) will be added to 'M_ENC_SRCS'
-  considering the value of the other role options.
-- 'M_ENC_NRM = c': the internal name of the encoding for the role 'NRM', which
-  is normal encoding. The globally-defined preprocessor macro '_G_ENC_NRM'
-  will be set to the value of this option. If 'M_ENC_SRCS' is empty, the
-  strictly necessary source code file(s) will be added to 'M_ENC_SRCS'
-  considering the value of the other role options.
 - 'M_ENC_TRN_W': if set, the string literal of the strings of the role 'TRN',
   the translatable strings, will have 'L' added to their beginning. This makes
   them a wide string.
 - 'M_ENC_SRCS: if set, it includes the names of the files from the directory
   which has the files which implement the encoding-specific objects. The names
   have neither file extension suffixed nor directory prefixed; for example,
-  "c_unkch w_conv_c". If unset, the following algorithm applies.
+  "c_unkch w_conv_c". If unset and 'M_AUTO' is set, the following algorithm
+  applies.
         - The file '$(M_ENC_TRN)_sz' is added.
         - The file '$(M_ENC_FIL)_unkch' is added.
         - If '$(M_ENC_TNR) == $(M_ENC_FIL)', the algorithm stops here,

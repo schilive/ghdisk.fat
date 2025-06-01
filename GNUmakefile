@@ -5,7 +5,7 @@
 #  - C_: A variable of constant value. Change at your own risk.
 #  - V_: A variable set internally. Do not change externally.
 #
-#  All macro starts with the prefix 'fn_'.
+#  All function macro starts with the prefix 'fn_<namespace>_'.
 #
 # !!!WARNINGS!!! Only tabs where strictly necessary, otherwise use 4 spaces for
 # indentation.
@@ -13,6 +13,13 @@
 ####
 #### 1. Settings
 ####
+
+V_CFLAGS =
+V_ENC_SRCS =
+
+M_AUTO ?= 1
+V_AUTO_ENC_SRCS =
+V_AUTO_CFLAGS =
 
 ###
 ### 1.1. OS Settings
@@ -84,6 +91,8 @@ ifeq ($(M_COMPILER),msvc)
 endif
 endif
 
+V_CFLAGS += $(M_CFLAGS)
+
 ###
 ### 1.3. String and Encoding System
 ###
@@ -95,26 +104,37 @@ M_ENC_FIL ?= c
 M_ENC_TRN_W ?=
 
 ifeq ($(M_ENC_SRCS),)
-    M_ENC_SRCS += $(M_ENC_TRN)_sz
-    M_ENC_SRCS += $(M_ENC_FIL)_unkch
+    V_AUTO_ENC_SRCS += $(M_ENC_TRN)_sz
+    V_AUTO_ENC_SRCS += $(M_ENC_FIL)_unkch
 
     ifneq ($(M_ENC_TRN),$(M_ENC_FIL))
         ifeq ($(M_ENC_TRN),$(M_ENC_NRM))
-            M_ENC_SRCS += $(M_ENC_TRN)_conv_$(M_ENC_FIL)
+            V_AUTO_ENC_SRCS += $(M_ENC_TRN)_conv_$(M_ENC_FIL)
         else
-            M_ENC_SRCS += $(M_ENC_TRN)_conv_$(M_ENC_NRM)
+            V_AUTO_ENC_SRCS += $(M_ENC_TRN)_conv_$(M_ENC_NRM)
             ifneq ($(M_ENC_NRM),$(M_ENC_FIL))
-                M_ENC_SRCS += $(M_ENC_NRM)_conv_$(M_ENC_FIL)
+                V_AUTO_ENC_SRCS += $(M_ENC_NRM)_conv_$(M_ENC_FIL)
             endif
         endif
     endif
+else
+    V_ENC_SRCS = $(M_ENC_SRCS)
 endif
 
-M_CFLAGS += $(call fn_-D,_G_ENC_TRN,$(M_ENC_TRN))
-M_CFLAGS += $(call fn_-D,_G_ENC_NRM,$(M_ENC_NRM))
-M_CFLAGS += $(call fn_-D,_G_ENC_FIL,$(M_ENC_FIL))
+V_AUTO_CFLAGS += $(call fn_cc_D,_G_ENC_TRN,$(M_ENC_TRN))
+V_AUTO_CFLAGS += $(call fn_cc_D,_G_ENC_NRM,$(M_ENC_NRM))
+V_AUTO_CFLAGS += $(call fn_cc_D,_G_ENC_FIL,$(M_ENC_FIL))
 ifneq ($(M_ENC_TRN_W),)
-    M_CFLAGS += $(call fn_-D,_G_ENC_TRN_W,)
+    V_CFLAGS += $(call fn_cc_D,_G_ENC_TRN_W,)
+else
+    ifeq ($(M_ENC_TRN),w)
+        V_AUTO_CFLAGS += $(call fn_cc_D,_G_ENC_TRN_W,)
+    endif
+endif
+
+ifneq ($(M_AUTO),)
+    V_CFLAGS += $(V_AUTO_CFLAGS)
+    V_ENC_SRCS += $(V_AUTO_ENC_SRCS)
 endif
 
 ###
@@ -138,7 +158,7 @@ M_BUILD_DIR ?= build
 #
 # Usage: <dir/dirs>
 ifeq ($(M_HOST_OS),winnt)
-    define fn_fmkdir
+    define fn_os_fmkdir
         IF NOT EXIST "$(subst /,\,$(1))" (MD "$(subst /,\,$(1))")\
         ELSE IF NOT EXIST "$(subst /,\,$(1))\\" (\
             ECHO.Error: file "$(subst /,\,$(1))" is not a directory >&2\
@@ -147,7 +167,7 @@ ifeq ($(M_HOST_OS),winnt)
     endef
 else
 ifeq ($(M_HOST_OS),posix)
-    define fn_fmkdir
+    define fn_os_fmkdir
         if ! [ -e $(1) ]; then\
             mkdir -p $(1);\
         elif ! [ -d $(1) ]; then\
@@ -161,13 +181,13 @@ endif
 # Deletes file and subdirectories. Does not return error.
 # Usage <file/dir>
 ifeq ($(M_HOST_OS),winnt)
-    define fn_rmdir
+    define fn_os_rmdir
         -DEL /S /Q $(1)
         -RD /S /Q $(1)
     endef
 else
 ifeq ($(M_HOST_OS),posix)
-    define fn_rmdir
+    define fn_os_rmdir
         rm -rf $(1)
     endef
 endif
@@ -180,13 +200,13 @@ endif
 # Compiles $(1) to object file $(2)
 # Usage <C source file, Output file>
 ifeq ($(M_COMPILER),gcc)
-    define fn_c_to_o
-        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) -c -o $(2) $(1)
+    define fn_cc_c_to_o
+        $(M_CC) $(V_CFLAGS) $(M_ACFLAGS) -c -o $(2) $(1)
     endef
 else
 ifeq ($(M_COMPILER),msvc)
-    define fn_c_to_o
-        $(M_CC) $(M_CFLAGS) $(M_ACFLAGS) /c /Fo:$(2) $(1)
+    define fn_cc_c_to_o
+        $(M_CC) $(V_CFLAGS) $(M_ACFLAGS) /c /Fo:$(2) $(1)
     endef
 endif
 endif
@@ -194,12 +214,12 @@ endif
 # Links $(1) to executable file $(2)
 # Usage <Object file(s), Output file>
 ifeq ($(M_COMPILER),gcc)
-    define fn_o_to_out
+    define fn_cc_o_to_out
         $(M_LD) -o $(2) $(1) $(M_LDFLAGS)
     endef
 else
 ifeq ($(M_COMPILER),msvc)
-    define fn_o_to_out
+    define fn_cc_o_to_out
         $(M_LD) $(M_LDFLAGS) /OUT:$(2) $(1)
     endef
 endif
@@ -210,12 +230,12 @@ endif
 #
 # Usage: <Macro name, macro value>
 ifeq ($(M_COMPILER),gcc)
-    define fn_-D
+    define fn_cc_D
 -D "$(1)=$(2)"
     endef
 else
 ifeq ($(M_COMPILER),msvc)
-    define fn_-D
+    define fn_cc_D
 /D "$(1)=$(2)"
     endef
 endif
@@ -230,16 +250,16 @@ endif
 # code. All members of the list after the first element, are the requirements.
 #
 # Usage: <{C source file} [Requirements]...>
-define fn_rule_c
+define fn_tar_c
 $(M_BUILD_DIR)/$(patsubst %.c,%$(M_O),$(word 1,$(1))): $(foreach i,$(1),$(C_SRC_DIR)$(i)) | build_dir
-	$(call fn_c_to_o,$$(word 1,$$^),$$@)
+	$(call fn_cc_c_to_o,$$(word 1,$$^),$$@)
 endef
 
 # Creates a double-colon rule of name 'build_dir' to create the directory $(1).
 # Usage: <dir>
-define fn_rule_buildDir
+define fn_tar_build_dir
 build_dir::
-	$(call fn_fmkdir,$(1))
+	$(call fn_os_fmkdir,$(1))
 endef
         
 ####
@@ -259,7 +279,7 @@ V_SRCS1 =\
 		*print.h*\
 		*sysstr.h
 V_SRCS = $(subst * *,*,$(V_SRCS1))
-V_SRCS += $(foreach i,$(M_ENC_SRCS),str/enc/$(i).c)
+V_SRCS += $(foreach i,$(V_ENC_SRCS),str/enc/$(i).c)
 
 V_TARGET_REQS = $(foreach i,$(V_SRCS),$(M_BUILD_DIR)/$(patsubst %.c,%$(M_O),$(word 1,$(subst *, ,$(i)))))
 V_DIRS1 = $(foreach i,$(V_SRCS),$(dir $(word 1,$(subst *, ,$(i)))))
@@ -276,14 +296,14 @@ $(info C: $(V_DIRS))
 build: $(M_BUILD_DIR)/$(M_TARGET)$(M_E)
 
 $(M_BUILD_DIR)/$(M_TARGET)$(M_E): $(V_TARGET_REQS) | build_dir
-	$(call fn_o_to_out,$^,$@)
+	$(call fn_cc_o_to_out,$^,$@)
 
-$(foreach i,$(V_SRCS),$(eval $(call fn_rule_c,$(subst *, ,$(i)))))
+$(foreach i,$(V_SRCS),$(eval $(call fn_tar_c,$(subst *, ,$(i)))))
 
-$(foreach i,$(V_DIRS),$(eval $(call fn_rule_buildDir,$(i))))
+$(foreach i,$(V_DIRS),$(eval $(call fn_tar_build_dir,$(i))))
 
 clean:
-	$(call fn_rmdir,$(M_BUILD_DIR))
+	$(call fn_os_rmdir,$(M_BUILD_DIR))
 
 re: clean build
 
