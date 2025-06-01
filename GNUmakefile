@@ -21,6 +21,12 @@ M_AUTO ?= 1
 V_AUTO_ENC_SRCS =
 V_AUTO_CFLAGS =
 
+V_TAB1 = A	B
+    V_TAB2 = $(subst A,,$(V_TAB1))
+    V_TAB = $(subst B,,$(V_TAB2))
+V_EMPTY =
+    V_SP = $(V_EMPTY) $(V_EMPTY)
+
 ###
 ### 1.1. OS Settings
 ###
@@ -193,6 +199,20 @@ ifeq ($(M_HOST_OS),posix)
 endif
 endif
 
+# Updates the timestamp of $(1).
+# Usage: <File>
+ifeq ($(M_HOST_OS),winnt)
+    define fn_os_touch
+        COPY /Y /B $(subst /,\,$(1)) +,, $(subst /,\,$(1)) > nul 2>&1
+    endef
+else
+ifeq ($(M_HOST_OS),posix)
+    define fn_os_touch
+        touch $(1)
+    endef
+endif
+endif
+
 ###
 ### 2.2. Compiler-Specific
 ###
@@ -246,13 +266,12 @@ endif
 ### 2.3. Target
 ###
 
-# Create rule for $(word 1, $(1))$(M_O) to compile $(word 1, $(1)) as a C source
-# code. All members of the list after the first element, are the requirements.
-#
-# Usage: <{C source file} [Requirements]...>
+# Creates rule for $(M_BUILD_DIR)$(1)$(M_O) to compile $(1) to it, and makes
+# $(C_SRC_DIR)$(1).c the requirement.
+# Usage: <C source file>
 define fn_tar_c
-$(M_BUILD_DIR)/$(patsubst %.c,%$(M_O),$(word 1,$(1))): $(foreach i,$(1),$(C_SRC_DIR)$(i)) | build_dir
-	$(call fn_cc_c_to_o,$$(word 1,$$^),$$@)
+$(M_BUILD_DIR)/$(1)$(M_O): $(C_SRC_DIR)/$(1).c | build_dir
+	$(call fn_cc_c_to_o,$(C_SRC_DIR)/$(1).c,$$@)
 endef
 
 # Creates a double-colon rule of name 'build_dir' to create the directory $(1).
@@ -261,50 +280,139 @@ define fn_tar_build_dir
 build_dir::
 	$(call fn_os_fmkdir,$(1))
 endef
+
+# Defines $(2) the prerequisite of target $(1)
+# Usage: <Target, Requirements>
+define fn_tar_req
+$(1): $(2)
+	$(call fn_os_touch,$(1))
+
+$(2):
+	$(call fn_os_touch,$(2))
+
+endef
         
 ####
 #### 3. Targets
 ####
 
-V_SRCS1 =\
+V_SRCS = ghdisk.fat str print
+    V_SRCS += $(foreach i,$(V_ENC_SRCS),str/enc/$(i))
+V_REQS1 =\
 	ghdisk.fat.c*\
 		*str.h*\
 		*print.h\
+	common.h*\
+		*str.h*\
+		*print.h\
+	print.h*\
+		*str.h\
+	print.c*\
+		*print.h*\
+		*sysstr.h\
 	str.c*\
 		*sysstr.h*\
 		*str/macros.h*\
 		*str/buffer.h*\
 		*str/converr.h\
-	print.c*\
-		*print.h*\
-		*sysstr.h
-V_SRCS = $(subst * *,*,$(V_SRCS1))
-V_SRCS += $(foreach i,$(V_ENC_SRCS),str/enc/$(i).c)
+	str.h*\
+		*str/str.h*\
+		*str/strenc.h*\
+		*str/macros.h\
+	sysstr.h*\
+		*str/converr.h*\
+		*str/str.h*\
+		*str/strenc.h*\
+		*str/buffer.h\
+	str/buffer.h\
+	str/conf.h\
+	str/converr.h\
+	str/enc.h*\
+		*str/converr.h*\
+		*str/str.h*\
+		*str/strenc.h*\
+		*str/buffer.h\
+	str/macros.h*\
+		*common.h*\
+		*str/macros.h*\
+		*str/converr.h\
+	str/str.h*\
+		*str/buffer.h*\
+		*str/strenc.h\
+	str/strenc.h*\
+		*str/macros.h
+    V_REQS1 += $(foreach i,$(V_ENC_SRCS), str/enc/$(i).c**str/enc.h)
+    V_REQS2 = $(subst $(V_TAB),,$(V_REQS1))
+    V_REQS = $(subst * *,*,$(V_REQS2))
 
-V_TARGET_REQS = $(foreach i,$(V_SRCS),$(M_BUILD_DIR)/$(patsubst %.c,%$(M_O),$(word 1,$(subst *, ,$(i)))))
-V_DIRS1 = $(foreach i,$(V_SRCS),$(dir $(word 1,$(subst *, ,$(i)))))
-V_DIRS2 = $(foreach i,$(V_DIRS1),$(M_BUILD_DIR)/$(i))
-ifeq ($(V_DIRS2),)
-    V_DIRS = $(M_BUILD_DIR)
-else
-    V_DIRS = $(sort $(V_DIRS2))
-endif
-$(info A: $(V_DIRS1))
-$(info B: $(V_DIRS2))
-$(info C: $(V_DIRS))
+V_TARGET_SRCS = $(foreach i,$(V_SRCS),$(word 1,$(subst *, ,$(i))))
+V_TARGET_OBJS1 = $(foreach i,$(V_SRCS),$(word 1,$(subst *, ,$(i))))
+    V_TARGET_OBJS = $(foreach i,$(V_TARGET_OBJS1),$(M_BUILD_DIR)/$(i)$(M_O))
+V_BUILD_DIRS1 = $(foreach i,$(V_TARGET_SRCS),$(dir $(M_BUILD_DIR)/$(i)))
+    V_BUILD_DIRS = $(sort $(V_BUILD_DIRS1))
 
 build: $(M_BUILD_DIR)/$(M_TARGET)$(M_E)
 
-$(M_BUILD_DIR)/$(M_TARGET)$(M_E): $(V_TARGET_REQS) | build_dir
+$(M_BUILD_DIR)/$(M_TARGET)$(M_E): $(V_TARGET_OBJS) | build_dir
 	$(call fn_cc_o_to_out,$^,$@)
 
-$(foreach i,$(V_SRCS),$(eval $(call fn_tar_c,$(subst *, ,$(i)))))
+$(foreach i,$(V_TARGET_SRCS),$(eval $(call fn_tar_c,$(i))))
 
-$(foreach i,$(V_DIRS),$(eval $(call fn_tar_build_dir,$(i))))
+$(foreach i,$(V_REQS),\
+	$(foreach j,$(wordlist 2,$(words $(subst *, ,$(i))),$(subst *, ,$(i))),\
+		$(eval $(call fn_tar_req,\
+			$(C_SRC_DIR)/$(word 1,$(subst *, ,$(i))),\
+			$(C_SRC_DIR)/$(j)\
+		))\
+	)\
+)
+
+
+$(foreach i,$(V_BUILD_DIRS),$(eval $(call fn_tar_build_dir,$(i))))
 
 clean:
 	$(call fn_os_rmdir,$(M_BUILD_DIR))
 
 re: clean build
 
+# V_SRCS1 =\
+# 	ghdisk.fat.c*\
+# 		*str.h*\
+# 		*print.h\
+# 	str.c*\
+# 		*sysstr.h*\
+# 		*str/macros.h*\
+# 		*str/buffer.h*\
+# 		*str/converr.h\
+# 	print.c*\
+# 		*print.h*\
+# 		*sysstr.h
+# V_SRCS = $(subst * *,*,$(V_SRCS1))
+# V_SRCS += $(foreach i,$(V_ENC_SRCS),str/enc/$(i).c)
+# 
+# V_TARGET_REQS = $(foreach i,$(V_SRCS),$(M_BUILD_DIR)/$(patsubst %.c,%$(M_O),$(word 1,$(subst *, ,$(i)))))
+# V_DIRS1 = $(foreach i,$(V_SRCS),$(dir $(word 1,$(subst *, ,$(i)))))
+# V_DIRS2 = $(foreach i,$(V_DIRS1),$(M_BUILD_DIR)/$(i))
+# ifeq ($(V_DIRS2),)
+#     V_DIRS = $(M_BUILD_DIR)
+# else
+#     V_DIRS = $(sort $(V_DIRS2))
+# endif
+# $(info A: $(V_DIRS1))
+# $(info B: $(V_DIRS2))
+# $(info C: $(V_DIRS))
+# 
+# build: $(M_BUILD_DIR)/$(M_TARGET)$(M_E)
+# 
+# $(M_BUILD_DIR)/$(M_TARGET)$(M_E): $(V_TARGET_REQS) | build_dir
+# 	$(call fn_cc_o_to_out,$^,$@)
+# 
+# $(foreach i,$(V_SRCS),$(eval $(call fn_tar_c,$(subst *, ,$(i)))))
+# 
+# $(foreach i,$(V_DIRS),$(eval $(call fn_tar_build_dir,$(i))))
+# 
+# clean:
+# 	$(call fn_os_rmdir,$(M_BUILD_DIR))
+# 
+# 
 .PHONY: build clean re build_dir
