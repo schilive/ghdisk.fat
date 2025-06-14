@@ -67,7 +67,7 @@ def generate_pot(ids):
 
 
 def cmd_create_pot(argv):
-    if len(argv) <= 2:
+    if len(argv) < 3:
         print_fatal("Not enough arguments given")
         return 1
 
@@ -95,7 +95,7 @@ def cmd_create_pot(argv):
 
 def main(argv):
     command = None
-    if len(argv) <= 1:
+    if len(argv) < 2:
         print_fatal("No command given")
         return 1
     command = argv[1]
