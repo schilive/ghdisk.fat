@@ -55,6 +55,17 @@ def parse_c(file):
     return result
 
 
+# Returns the string
+def generate_pot(ids):
+    result = ""
+    for i in ids:
+        result += "msgid \"" + i + "\""
+        result += "\n"
+        result += "msgstr \"\""
+        result += "\n"
+    return result
+
+
 def cmd_create_pot(argv):
     if len(argv) <= 1:
         print_fatal("No arguments given")
@@ -63,11 +74,25 @@ def cmd_create_pot(argv):
         print_fatal("Not enough arguments given")
         return 1
 
-    file_object = open(argv[1], mode="rt", encoding=G_FILE_ENCODING, errors="strict")
-    file_content = file_object.read()
-    file_object.close()
+    file_in_object = open(
+        argv[1], 
+        mode="rt", 
+        encoding=G_FILE_ENCODING,
+        errors="strict"
+    )
+    file_in_content = file_in_object.read()
+    file_in_object.close()
 
-    print(parse_c(file_content))
+    ids = parse_c(file_in_content)
+
+    file_out_object = open(
+        argv[2], 
+        mode="wt", 
+        encoding=G_FILE_ENCODING, 
+        errors="strict"
+    )
+    file_out_content = file_out_object.write(generate_pot(ids))
+    file_out_object.close()
     return 0
 
 
