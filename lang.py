@@ -93,6 +93,19 @@ def cmd_create_pot(argv):
     return 0
 
 
+def cmd_create_po(argv):
+    if len(argv) < 3:
+        print_fatal("Not enough arguments given")
+        return 1
+    
+    file_in_object = open(argv[1], "rb")
+    file_out_object = open(argv[2], "wb")
+    file_out_object.write(file_in_object.read())
+    file_out_object.close()
+    file_in_object.close()
+    return 0
+
+
 def main(argv):
     command = None
     if len(argv) < 2:
@@ -102,6 +115,8 @@ def main(argv):
 
     if command == "create_pot":
         return cmd_create_pot(argv[1:])
+    elif command == "create_po":
+        return cmd_create_po(argv[1:])
     print_fatal("Unknown command given: '" + command + "'")
     return 1
 
