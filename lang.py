@@ -1,13 +1,28 @@
 #!/usr/bin/env python3
 
 import sys
+import enum
 
 G_C_SPACE_CHARACTERS = set([" ", "\t", "\v", "\n"])
 G_PO_SPACE_CHARACTERS = set([" ", "\t", "\v"])
 
+G_C_PUNCTUATORS_1 = set(["[", "]", "(", ")", "*", ",", ":", "=", ";," "#"])
+G_C_PUNCTUATORS_3 = set(["..."])
+G_C_OPERATORS_1 = set(["[", "]", "(", ")", ".", "+", "-", "&", "*", "~", "!", "/", "%", "<", ">", "=", "^", "|", "?",
+                       ":", ",", "#"])
+G_C_OPERATORS_2 = set(["->", "++", "--", "&&", "<<", ">>", "<=", ">=", "==", "!=", "||", "*=", "/=", "%=", "-=", "&=",
+                       "|=", "^=", "##"])
+G_C_OPERATORS_3 = set(["<<=", ">>="])
+
 # Implementation-Specific
 G_FILE_ENCODING = "ascii"
 G_KEYWORD = "STR_TRN"
+
+
+@enum.unique
+class CContext(enum.Enum):
+    COMMENT = enum.auto()
+    CODE = enum.auto()
 
 
 class CId:
@@ -38,48 +53,94 @@ def print_fatal(message):
     print("Fatal error: " + message, file=sys.stderr)
 
 
+# Ignores comments
+# Returns None if there is no next token, otherwise returns CId
+def get_next_c_token(file, offset):
+    if len(file) == offset:
+        return None
+
+    if file[offset] in G_C_SPACE_CHARACTERS:
+        while len(file) != offset and file[offset] in G_C_SPACE_CHARACTERS:
+            offset += 1
+        return get_next_c_token(file, offset)
+    if len(file) - offset >= 2 and file[offset:offset + 2] == "/*":
+        offset += 2
+        end_comment = file.find("*/", offset)
+        if end_comment == -1:
+            return None
+        offset = end_comment + 2
+        return get_next_c_token(file, offset)
+
+    # Clusters
+    if len(file) - offset >= 3 and file[offset:offset + 3] in G_C_PUNCTUATORS_3:
+        return CId(file[offset:offset + 3], offset, offset + 2)
+    elif len(file) - offset >= 3 and file[offset:offset + 3] in G_C_OPERATORS_3:
+        return CId(file[offset:offset + 3], offset, offset + 2)
+    elif len(file) - offset >= 2 and file[offset:offset + 2] in G_C_OPERATORS_2:
+        return CId(file[offset:offset + 2], offset, offset + 1)
+    elif file[offset] in G_C_PUNCTUATORS_1:
+        return CId(file[offset:offset + 1], offset, offset)
+    elif file[offset] in G_C_OPERATORS_1:
+        return CId(file[offset:offset + 1], offset, offset)
+
+    # Strings
+    if file[offset] == "\"":
+        end_string = offset + 1
+        while True:
+            end_string = file.find("\"", end_string)
+            if file[end_string - 1] == "\\":
+                end_string += 1
+                continue
+            if end_string == -1:
+                return None
+            break
+        return CId(file[offset:end_string + 1], offset, end_string)
+
+    # Identifiers
+    token = ""
+    end_token = offset
+    while True:
+        if len(file) == offset:
+            break
+        if file[end_token] in G_C_OPERATORS_1:
+            break
+        if file[end_token] in G_C_PUNCTUATORS_1:
+            break
+        if file[end_token] in G_C_SPACE_CHARACTERS:
+            break
+        end_token += 1
+    return CId(file[offset:end_token], offset, end_token - 1)
+
 # Returns a list of 'CId's with all translation identifiers and their begining and ending indeces.
 def parse_c(file):
     # <keyword> <space*>
 
-    offset = 0
     result = []
+    tokens = [None] * 4
+    offset = 0
+    for i in range(0, 4):
+        token = get_next_c_token(file, offset)
+        if token == None:
+            return []
+        tokens[i] = token
+        offset = token.end + 1
+
     while True:
-        begin = file.find(G_KEYWORD, offset)
-        if begin == -1:
+        if\
+            tokens[0].content == G_KEYWORD and\
+            tokens[1].content == "(" and\
+            tokens[2].content[0] == "\"" and\
+            tokens[3].content == ")"\
+        :
+            result.append(CId(tokens[2].content[1:-1], tokens[0].begin, tokens[-1].end))
+
+        token = get_next_c_token(file, offset)
+        if token == None:
             break
-        offset = begin + len(G_KEYWORD)
-
-        while file[offset] in G_C_SPACE_CHARACTERS:
-            offset += 1
-
-        #assert(file[offset] == "(")
-        offset += 1
-
-        while file[offset] in G_C_SPACE_CHARACTERS:
-            offset += 1
-
-        #assert(file[offset] == "\"")
-        offset += 1
-
-        string = ""
-        while file[offset] != "\"":
-            if file[offset] == "\\" and file[offset + 1] == "\"":
-                offset += 1
-            string += file[offset]
-            offset += 1
-
-        #assert(file[offset] == "\"")
-        offset += 1
-
-        while file[offset] in G_C_SPACE_CHARACTERS:
-            offset += 1
-
-        #assert(file[offset] == ")")
-        offset += 1
-
-        result.append(CId(string, begin, offset - 1))
-        continue
+        for i in range(1, len(tokens)):
+            tokens[i - 1] = tokens[i]
+        tokens[-1] = token
+        offset = token.end + 1
     return result
 
 
