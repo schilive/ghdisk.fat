@@ -3,6 +3,12 @@
 import sys
 import enum
 
+G_PO_C_CHARACTERS = set(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                         'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+                         'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4',
+                         '5', '6', '7', '8', '9', '!', '#', '%', '&', '(', ')', '*', '+', ',', '-', '.', '/', ';', '<',
+                         '=', '>', '?', '[', ']', '^', '_', '{', '|', '}', '~', ' ', ':'])
+
 G_C_SPACE_CHARACTERS = set([" ", "\t", "\v", "\n"])
 G_PO_SPACE_CHARACTERS = set([" ", "\t", "\v"])
 
@@ -51,6 +57,23 @@ def replace_all(target, indeces, replacements):
 
 def print_fatal(message):
     print("Fatal error: " + message, file=sys.stderr)
+
+
+def is_valid_c_string(string):
+    offset = 0
+    while offset != len(string):
+        if string[offset] in G_PO_C_CHARACTERS:
+            offset += 1
+            continue
+        if string[offset] == "\\":
+            if len(string) - offset >= 2 and string[offset + 1] in {"\"", "\'"}:
+                offset += 2
+                continue
+            print_fatal("Backslash character does not follow either <\"> or <\'>")
+            return False
+        print_fatal("Unsupported character used: \"" + string[offset] + "\"")
+        return False
+    return True
 
 
 # Join lines which end in "\"
@@ -155,7 +178,8 @@ def get_next_c_token_real(file, offset):
     return CId(file[offset:end_token], offset, end_token - 1)
 
 # Returns a list of 'CId's with all translation identifiers and their begining and ending indeces.
-def parse_c(file):
+# Validates that the strings are <C string>
+def parse_c_and_validate(file):
     file = join_backslash_lines(file)
     file = remove_c_preprocessor(file)
 
@@ -177,6 +201,9 @@ def parse_c(file):
             tokens[3].content == ")"\
         :
             result.append(CId(tokens[2].content[1:-1], tokens[0].begin, tokens[-1].end))
+            if not is_valid_c_string(result[-1].content):
+                print_fatal("String at line " + str(file[:offset].count("\n") + 1) + "is invalid")
+                exit(1)
 
         token = get_next_c_token_real(file, offset)
         if token == None:
@@ -267,7 +294,7 @@ def cmd_create_pot(argv):
     file_in_content = file_in_object.read()
     file_in_object.close()
 
-    cids = parse_c(file_in_content)
+    cids = parse_c_and_validate(file_in_content)
     ids = []
     for i in cids:
         ids.append(i.content)
@@ -321,7 +348,7 @@ def cmd_apply_po(argv):
     file_c_content = file_c_object.read()
     file_c_object.close()
 
-    cids = parse_c(file_c_content)
+    cids = parse_c_and_validate(file_c_content)
     trans = parse_po(file_po_content)
 
     replace_indeces = []
