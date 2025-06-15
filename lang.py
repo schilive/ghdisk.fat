@@ -53,6 +53,23 @@ def print_fatal(message):
     print("Fatal error: " + message, file=sys.stderr)
 
 
+# Join lines which end in "\"
+def join_backslash_lines(file):
+    lines = file.split("\n")
+    result = ""
+    for l in lines:
+        result += l + "\n"
+
+        if len(l) == 0:
+            continue
+        if l[-1] == "\\":
+            result = result[:-2]
+    #assert(result[-1] == "\n")
+    if file[-1] != "\n":
+        result = result[:-1]
+    return result
+
+
 # Returns the file's content without the and preprocessor directives
 def remove_c_preprocessor(file):
     lines = file.split("\n")
@@ -81,21 +98,21 @@ def remove_c_preprocessor(file):
 # Assumes 'remove_c_preprocessor()'.
 # Igores comments.
 # Returns None if there is no next token, otherwise returns CId.
-def get_next_c_code_token(file, offset):
+def get_next_c_token_real(file, offset):
     if len(file) == offset:
         return None
 
     if file[offset] in G_C_SPACE_CHARACTERS:
         while len(file) != offset and file[offset] in G_C_SPACE_CHARACTERS:
             offset += 1
-        return get_next_c_code_token(file, offset)
+        return get_next_c_token_real(file, offset)
     if len(file) - offset >= 2 and file[offset:offset + 2] == "/*":
         offset += 2
         end_comment = file.find("*/", offset)
         if end_comment == -1:
             return None
         offset = end_comment + 2
-        return get_next_c_code_token(file, offset)
+        return get_next_c_token_real(file, offset)
 
     # Clusters
     if len(file) - offset >= 3 and file[offset:offset + 3] in G_C_PUNCTUATORS_3:
@@ -139,13 +156,14 @@ def get_next_c_code_token(file, offset):
 
 # Returns a list of 'CId's with all translation identifiers and their begining and ending indeces.
 def parse_c(file):
+    file = join_backslash_lines(file)
     file = remove_c_preprocessor(file)
 
     result = []
     tokens = [None] * 4
     offset = 0
     for i in range(0, 4):
-        token = get_next_c_code_token(file, offset)
+        token = get_next_c_token_real(file, offset)
         if token == None:
             return []
         tokens[i] = token
@@ -160,7 +178,7 @@ def parse_c(file):
         :
             result.append(CId(tokens[2].content[1:-1], tokens[0].begin, tokens[-1].end))
 
-        token = get_next_c_code_token(file, offset)
+        token = get_next_c_token_real(file, offset)
         if token == None:
             break
         for i in range(1, len(tokens)):
